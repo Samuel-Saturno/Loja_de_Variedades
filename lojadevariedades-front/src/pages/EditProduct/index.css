@@ -1,0 +1,435 @@
+/* ===== PÁGINA PRINCIPAL DE EDIÇÃO ===== */
+.edit-product-main-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--primary-background);
+}
+
+.edit-product-header-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 30px 0;
+  margin-bottom: 2rem;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.edit-main-back-btn {
+  background: var(--primary-color);
+  border: 1px solid var(--tertiary-color);
+  color: var(--tertiary-color);
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-main-back-btn:hover {
+  background: var(--tertiary-color);
+  color: var(--primary-color);
+  transform: translateX(-2px);
+}
+
+.edit-product-main-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--secondary-color);
+  margin: 0;
+}
+
+/* ===== SEÇÃO DE BUSCA E FILTROS ===== */
+.edit-product-search-section {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+  background: var(--primary-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.edit-search-filters {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.edit-search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.edit-search-icon {
+  position: absolute;
+  left: 12px;
+  color: #6c757d;
+  z-index: 1;
+}
+
+.edit-search-input {
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.edit-search-input:focus {
+  outline: none;
+  border-color: var(--tertiary-color);
+  box-shadow: 0 0 0 3px rgba(255, 206, 7, 0.1);
+}
+
+.edit-category-filter {
+  padding: 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: var(--primary-color);
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.edit-category-filter:focus {
+  outline: none;
+  border-color: var(--tertiary-color);
+}
+
+.edit-results-info {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.edit-results-info p {
+  margin: 0;
+}
+
+/* ===== LISTA DE PRODUTOS ===== */
+.edit-products-list-section {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.edit-no-products {
+  background: var(--primary-color);
+  border-radius: 12px;
+  padding: 3rem;
+  text-align: center;
+  color: #6c757d;
+}
+
+.edit-products-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.edit-product-item {
+  background: var(--primary-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.edit-product-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-color: var(--tertiary-color);
+}
+
+.edit-product-image-wrapper {
+  flex-shrink: 0;
+}
+
+.edit-product-item-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #f8f9fa;
+}
+
+.edit-product-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.edit-product-item-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.edit-product-item-description {
+  color: #6c757d;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.edit-product-item-details {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.edit-product-item-category {
+  background: #e9ecef;
+  color: #495057;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.edit-product-item-price {
+  font-weight: 600;
+  color: var(--tertiary-color);
+  font-size: 1.1rem;
+}
+
+.edit-product-action-btn {
+  background: var(--tertiary-color);
+  color: var(--secondary-color);
+  border: none;
+  padding: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.edit-product-action-btn:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+/* ===== FORMULÁRIO DE EDIÇÃO ===== */
+.edit-product-form-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--primary-background);
+  padding: 2rem;
+}
+
+.edit-product-form-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.edit-form-back-btn {
+  background: var(--primary-color);
+  border: 1px solid var(--tertiary-color);
+  color: var(--tertiary-color);
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-form-back-btn:hover {
+  background: var(--tertiary-color);
+  color: var(--secondary-color);
+  transform: translateX(-2px);
+}
+
+.edit-form-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--secondary-color);
+  margin: 0;
+}
+
+.edit-product-form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: var(--primary-color);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.edit-product-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.edit-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.edit-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.edit-form-group input,
+.edit-form-group select,
+.edit-form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.edit-form-group input:focus,
+.edit-form-group select:focus,
+.edit-form-group textarea:focus {
+  outline: none;
+  border-color: var(--tertiary-color);
+  box-shadow: 0 0 0 3px rgba(255, 206, 7, 0.1);
+}
+
+.edit-form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.edit-image-input {
+  padding: 8px !important;
+}
+
+.edit-image-preview-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-image-preview-container label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.edit-image-preview {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #e1e5e9;
+}
+
+.edit-form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e1e5e9;
+}
+
+.edit-cancel-btn {
+  padding: 12px 24px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.edit-cancel-btn:hover:not(:disabled) {
+  background: #5a6268;
+}
+
+.edit-submit-btn {
+  padding: 12px 24px;
+  background: var(--tertiary-color);
+  color: var(--secondary-color);
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.edit-submit-btn:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.edit-submit-btn:disabled,
+.edit-cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 768px) {
+  .edit-product-main-wrapper,
+  .edit-product-form-wrapper {
+    padding: 1rem;
+  }
+  
+  .edit-search-filters {
+    grid-template-columns: 1fr;
+  }
+  
+  .edit-form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .edit-product-item {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .edit-product-item-details {
+    justify-content: center;
+  }
+  
+  .edit-form-actions {
+    flex-direction: column;
+  }
+  
+  .edit-product-main-title,
+  .edit-form-title {
+    font-size: 1.5rem;
+  }
+  
+  .edit-image-preview {
+    width: 150px;
+    height: 150px;
+  }
+}
