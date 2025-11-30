@@ -1,0 +1,47 @@
+# File: Dockerfile
+FROM eclipse-temurin:17-jdk-jammy
+ARG JAR_FILE=target/loja-variedades-backend-0.0.1-SNAPSHOT.jar
+COPY ${JAR_FILE} app.jar
+ENTRYPOINT ["java","-jar","/app.jar"]
+```
+
+
+---
+
+
+## docker-compose.yml
+
+
+```yaml
+# File: docker-compose.yml
+version: '3.8'
+services:
+db:
+image: postgres:15
+environment:
+POSTGRES_DB: lojavariedades
+POSTGRES_USER: postgres
+POSTGRES_PASSWORD: postgres
+ports:
+- "5432:5432"
+volumes:
+- db_data:/var/lib/postgresql/data
+
+
+app:
+build: .
+depends_on:
+- db
+environment:
+DB_HOST: db
+DB_PORT: 5432
+DB_NAME: lojavariedades
+DB_USER: postgres
+DB_PASSWORD: postgres
+JWT_SECRET: change_me_but_use_env_in_prod_change_now
+ports:
+- "8080:8080"
+
+
+volumes:
+db_data:
