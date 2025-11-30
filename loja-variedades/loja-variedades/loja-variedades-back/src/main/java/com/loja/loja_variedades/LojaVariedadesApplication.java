@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class LojaVariedadesApplication {
-public static void main(String[] args) {
-SpringApplication.run(LojaVariedadesApplication.class, args);
-}
+	public static void main(String[] args) {
+		SpringApplication.run(LojaVariedadesApplication.class, args);
+	}
 }
