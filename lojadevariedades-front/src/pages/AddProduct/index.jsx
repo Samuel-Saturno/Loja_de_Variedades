@@ -2,21 +2,19 @@ import React, { useState } from 'react'
 import './index.css'
 import { useNavigate } from 'react-router-dom'
 import { IoArrowBack } from 'react-icons/io5'
-import { MdCloudUpload } from 'react-icons/md'
+import productService from '../../services/productService'
 
 const AddProduct = () => {
     const [formData, setFormData] = useState({
         name: '',
         description: '',
         price: '',
-        category: 'Perfumes',
-        image: null,
-        imagePreview: null
+        stockQuantity: '',
+        imageUrl: ''
     })
     const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState('')
     const navigate = useNavigate()
-
-    const categories = ['Perfumes', 'Eletrônicos', 'Plásticos', 'Alumínios', 'Calçados', 'Higiene']
 
     const handleInputChange = (e) => {
         const { name, value } = e.target
@@ -24,43 +22,36 @@ const AddProduct = () => {
             ...formData,
             [name]: value
         })
-    }
-
-    const handleImageChange = (e) => {
-        const file = e.target.files[0]
-        if (file) {
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                setFormData({
-                    ...formData,
-                    image: file,
-                    imagePreview: reader.result
-                })
-            }
-            reader.readAsDataURL(file)
-        }
+        setError('')
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+        setError('')
         setIsLoading(true)
 
-        // Simular adição do produto
         try {
-            // Aqui seria feita a requisição para a API
-            console.log('Produto adicionado:', {
-                ...formData,
-                id: Date.now(), // ID temporário
-                image: formData.imagePreview || '/placeholder-image.jpg'
-            })
+            // Validar campos obrigatórios
+            if (!formData.name || !formData.price || !formData.stockQuantity) {
+                setError('Preencha todos os campos obrigatórios')
+                setIsLoading(false)
+                return
+            }
 
-            // Simular delay da API
-            await new Promise(resolve => setTimeout(resolve, 1500))
+            const product = {
+                name: formData.name,
+                description: formData.description,
+                price: parseFloat(formData.price),
+                stockQuantity: parseInt(formData.stockQuantity),
+                imageUrl: formData.imageUrl
+            }
 
+            await productService.create(product)
             alert('Produto adicionado com sucesso!')
             navigate('/manage')
-        } catch (error) {
-            alert('Erro ao adicionar produto')
+        } catch (err) {
+            setError(err.message || 'Erro ao adicionar produto')
+            console.error('Erro:', err)
         } finally {
             setIsLoading(false)
         }
@@ -80,6 +71,8 @@ const AddProduct = () => {
             </div>
 
             <div className='add-product-form-container'>
+                {error && <div className='error-message'>{error}</div>}
+                
                 <form onSubmit={handleSubmit} className='add-product-form'>
                     <div className='form-row'>
                         <div className='form-group'>
@@ -92,29 +85,13 @@ const AddProduct = () => {
                                 onChange={handleInputChange}
                                 placeholder='Digite o nome do produto'
                                 required
+                                disabled={isLoading}
                             />
-                        </div>
-
-                        <div className='form-group'>
-                            <label htmlFor='category'>Categoria *</label>
-                            <select
-                                id='category'
-                                name='category'
-                                value={formData.category}
-                                onChange={handleInputChange}
-                                required
-                            >
-                                {categories.map((category) => (
-                                    <option key={category} value={category}>
-                                        {category}
-                                    </option>
-                                ))}
-                            </select>
                         </div>
                     </div>
 
                     <div className='form-group'>
-                        <label htmlFor='description'>Descrição *</label>
+                        <label htmlFor='description'>Descrição</label>
                         <textarea
                             id='description'
                             name='description'
@@ -122,7 +99,7 @@ const AddProduct = () => {
                             onChange={handleInputChange}
                             placeholder='Digite a descrição do produto'
                             rows={4}
-                            required
+                            disabled={isLoading}
                         />
                     </div>
 
@@ -139,37 +116,38 @@ const AddProduct = () => {
                                 min='0'
                                 step='0.01'
                                 required
+                                disabled={isLoading}
                             />
                         </div>
 
                         <div className='form-group'>
-                            <label htmlFor='image'>Imagem do Produto</label>
-                            <div className='image-upload-container'>
-                                <input
-                                    type='file'
-                                    id='image'
-                                    accept='image/*'
-                                    onChange={handleImageChange}
-                                    className='image-input'
-                                />
-                                <label htmlFor='image' className='image-upload-label'>
-                                    <MdCloudUpload size={24} />
-                                    <span>Clique para selecionar uma imagem</span>
-                                </label>
-                            </div>
+                            <label htmlFor='stockQuantity'>Quantidade em Estoque *</label>
+                            <input
+                                type='number'
+                                id='stockQuantity'
+                                name='stockQuantity'
+                                value={formData.stockQuantity}
+                                onChange={handleInputChange}
+                                placeholder='0'
+                                min='0'
+                                required
+                                disabled={isLoading}
+                            />
                         </div>
                     </div>
 
-                    {formData.imagePreview && (
-                        <div className='image-preview-container'>
-                            <label>Pré-visualização da Imagem</label>
-                            <img
-                                src={formData.imagePreview}
-                                alt='Preview'
-                                className='image-preview'
-                            />
-                        </div>
-                    )}
+                    <div className='form-group'>
+                        <label htmlFor='imageUrl'>URL da Imagem</label>
+                        <input
+                            type='url'
+                            id='imageUrl'
+                            name='imageUrl'
+                            value={formData.imageUrl}
+                            onChange={handleInputChange}
+                            placeholder='https://exemplo.com/imagem.jpg'
+                            disabled={isLoading}
+                        />
+                    </div>
 
                     <div className='form-actions'>
                         <button
