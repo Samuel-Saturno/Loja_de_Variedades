@@ -1,34 +1,48 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import './index.css'
 import { useNavigate } from 'react-router-dom'
 import { IoArrowBack, IoSearch } from 'react-icons/io5'
 import { MdDelete, MdWarning } from 'react-icons/md'
-import { ProductMocks } from '../../components/Product/mocks'
+import productService from '../../services/productService'
 
 const DeleteProduct = () => {
+  const [products, setProducts] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('Todos')
   const [selectedProducts, setSelectedProducts] = useState([])
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [loadingList, setLoadingList] = useState(false)
+  const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  const categories = ['Todos', 'Perfumes', 'Eletrônicos', 'Plásticos', 'Alumínios', 'Calçados', 'Higiene']
+  // Carregar produtos ao montar
+  useEffect(() => {
+    fetchProducts()
+  }, [])
 
-  // Filtrar produtos baseado na busca e categoria
-  const filteredProducts = ProductMocks.filter(product => {
+  const fetchProducts = async () => {
+    setLoadingList(true)
+    setError('')
+    try {
+      const data = await productService.getAll(0, 100, searchQuery)
+      setProducts(data.content || data)
+    } catch (err) {
+      setError('Erro ao carregar produtos')
+      console.error('Erro:', err)
+    } finally {
+      setLoadingList(false)
+    }
+  }
+
+  // Filtrar produtos baseado na busca
+  const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          product.description.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = categoryFilter === 'Todos' || product.category === categoryFilter
-    return matchesSearch && matchesCategory
+    return matchesSearch
   })
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value)
-  }
-
-  const handleCategoryChange = (e) => {
-    setCategoryFilter(e.target.value)
   }
 
   const handleProductSelect = (productId) => {
@@ -61,17 +75,18 @@ const DeleteProduct = () => {
     setIsDeleting(true)
     
     try {
-      // Simular exclusão dos produtos
-      console.log('Produtos excluídos:', selectedProducts)
-      
-      // Simular delay da API
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Deletar produtos um por um
+      for (const productId of selectedProducts) {
+        await productService.delete(productId)
+      }
       
       alert(`${selectedProducts.length} produto(s) excluído(s) com sucesso!`)
       setSelectedProducts([])
       setShowConfirmModal(false)
-    } catch (error) {
-      alert('Erro ao excluir produtos')
+      fetchProducts()
+    } catch (err) {
+      setError(err.message || 'Erro ao excluir produtos')
+      console.error('Erro:', err)
     } finally {
       setIsDeleting(false)
     }
@@ -157,18 +172,6 @@ const DeleteProduct = () => {
               className='delete-search-input'
             />
           </div>
-          
-          <select
-            value={categoryFilter}
-            onChange={handleCategoryChange}
-            className='delete-category-filter'
-          >
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
         </div>
 
         <div className='delete-actions-bar'>
@@ -197,7 +200,11 @@ const DeleteProduct = () => {
       </div>
 
       <div className='delete-products-list-section'>
-        {filteredProducts.length === 0 ? (
+        {loadingList ? (
+          <div className='loading'>Carregando produtos...</div>
+        ) : error ? (
+          <div className='error'>{error}</div>
+        ) : filteredProducts.length === 0 ? (
           <div className='delete-no-products'>
             <p>Nenhum produto encontrado</p>
           </div>
@@ -222,7 +229,7 @@ const DeleteProduct = () => {
                 
                 <div className='delete-card-image-wrapper'>
                   <img 
-                    src={product.image} 
+                    src={product.imageUrl || 'https://via.placeholder.com/300'} 
                     alt={product.name}
                     className='delete-card-image'
                   />
@@ -232,8 +239,8 @@ const DeleteProduct = () => {
                   <h3 className='delete-card-name'>{product.name}</h3>
                   <p className='delete-card-description'>{product.description}</p>
                   <div className='delete-card-details'>
-                    <span className='delete-card-category'>{product.category}</span>
-                    <span className='delete-card-price'>R$ {product.price.toFixed(2)}</span>
+                    <span className='delete-card-price'>R$ {Number(product.price).toFixed(2)}</span>
+                    <span className='delete-card-stock'>Estoque: {product.stockQuantity}</span>
                   </div>
                 </div>
               </div>

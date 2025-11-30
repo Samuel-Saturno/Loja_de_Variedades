@@ -5,13 +5,11 @@ import com.example.loja.DTOs.ProductDTO;
 import com.example.loja.model.Product;
 import com.example.loja.service.ProductService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
 @RestController
 @RequestMapping("/api/admin/products")
-@PreAuthorize("hasRole('ADMIN')")
 public class AdminProductController {
     private final ProductService service;
     public AdminProductController(ProductService service) { this.service = service; }
