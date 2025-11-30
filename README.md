@@ -8,13 +8,9 @@
 2. Configure as variáveis de ambiente ou use o docker-compose.
 
 
-Para rodar com Docker Compose:
+Para rodar com o Maven
 
-
-```
-docker-compose up --build
-```
-
+```mvn spring-boot:run```
 
 A API estará em http://localhost:8080
 
