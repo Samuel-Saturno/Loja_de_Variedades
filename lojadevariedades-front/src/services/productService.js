@@ -6,7 +6,8 @@ const productService = {
     try {
       const params = { page, size };
       if (search) params.q = search;
-      if (categoryId) params.categoryId = categoryId;
+      // only send numeric categoryId (backend expects Long). If categoryId is a non-numeric label (e.g. 'Todos'), ignore it
+      if (categoryId && !isNaN(Number(categoryId))) params.categoryId = Number(categoryId);
       
       const response = await apiClient.get('/products', { params });
       return response.data;

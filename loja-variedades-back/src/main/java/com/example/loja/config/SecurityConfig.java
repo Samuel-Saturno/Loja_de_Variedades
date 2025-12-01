@@ -28,13 +28,14 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/v3/api-docs.yaml"
                 ).permitAll()
+                .requestMatchers("/", "/index.html", "/static/**", "/assets/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/products/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, BasicAuthenticationFilter.class)
-            .httpBasic(Customizer.withDefaults());
+            ;
 
         return http.build();
         }
