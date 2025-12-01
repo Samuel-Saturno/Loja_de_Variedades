@@ -18,3 +18,11 @@ package-lock.json
 
 # Java
 *.jar
+
+# Ensure local H2 DB and presentation data are ignored
+# (cover common patterns and the backend data folder)
+loja-variedades-back/data/
+loja-variedades-back/target/
+
+# Ignore built static assets copied into backend during presentation builds
+loja-variedades-back/src/main/resources/static/
