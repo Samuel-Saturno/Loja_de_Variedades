@@ -47,13 +47,17 @@ Este documento explica de forma concisa como executar, depurar e entender o sist
 - Pela interface (recomendado):
   1. Abra `http://localhost:8080` no navegador.
   2. Clique no ícone de perfil / botão `Login`.
-  3. Entre com as credenciais dev (seeded durante apresentação):
-     - Email: `admin@loja.com`
-     - Senha: `admin123`
-  4. Depois de logado, navegue até a área de administração / `Manage` ou `Add Product` e use o formulário para criar o produto.
+  3. Entre com as credenciais de teste:
+     - **Admin** (para gerenciar produtos):
+       - Email: `admin@loja.com`
+       - Senha: `admin123`
+     - **Usuário comum** (para navegar/comprar):
+       - Email: `usuario@loja.com`
+       - Senha: `123456`
+  4. Depois de logado como admin, clique no perfil e selecione "Gerenciar Loja" ou navegue para `Add Product` e use o formulário para criar o produto.
 
 - Via API (curl):
-  1. Obter token:
+  1. Obter token (use credenciais de admin):
 
     ```bash
     curl -s -X POST http://localhost:8080/api/auth/login \
@@ -76,7 +80,7 @@ Este documento explica de forma concisa como executar, depurar e entender o sist
 **4. Arquitetura e pontos importantes do código**
 - `loja-variedades-back/src/main/java/com/example/loja/config/SecurityConfig.java` — configura CORS, regras de autorização e registra `JwtAuthenticationFilter`. *Removemos* `httpBasic()` para evitar que o navegador exiba prompt de autenticação.
 - `JwtAuthenticationFilter.java` — extrai JWT do header `Authorization` e popula `SecurityContext`.
-- `AdminUserInitializer.java` — seeder de admin para desenvolvimento (cria/atualiza `admin@loja.com` com senha `admin123`). Remover antes de deploy público.
+- `AdminUserInitializer.java` — cria usuários de teste na inicialização: admin (`admin@loja.com`) e usuário comum (`usuario@loja.com`). Remover antes de deploy público.
 - `ProductController.java` — endpoints públicos de produtos (`/api/products`).
 - Frontend:
   - `lojadevariedades-front/src/api/apiClient.js` — axios client com interceptor para anexar `Authorization: Bearer <token>` (salvo em `localStorage`)
