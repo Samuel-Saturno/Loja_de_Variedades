@@ -26,3 +26,11 @@ loja-variedades-back/target/
 
 # Ignore built static assets copied into backend during presentation builds
 loja-variedades-back/src/main/resources/static/
+
+# Presentation materials (private)
+docs/pitch.md
+ANTONIO_NOGUEIRA_GUIA_ESTUDO.md
+CHECKLIST_APRESENTACAO.md
+
+# VS Code settings (personal)
+.vscode/
