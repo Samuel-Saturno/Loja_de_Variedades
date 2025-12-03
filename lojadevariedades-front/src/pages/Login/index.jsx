@@ -3,18 +3,18 @@ import './index.css'
 import { useNavigate } from 'react-router-dom'
 import Logo from '../../assets/img/logoarmarinho.jpg'
 import { IoArrowBack } from 'react-icons/io5'
-import apiClient from '../../api/apiClient'
+import authService from '../../services/authService'
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
     name: ''
   })
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   const handleInputChange = (e) => {
@@ -29,43 +29,27 @@ const Login = () => {
     e.preventDefault()
     setError('')
     setLoading(true)
-
+    
     try {
       if (isLogin) {
-        // Login
-        const response = await apiClient.post('/auth/login', {
-          email: formData.email,
-          password: formData.password
-        })
-        
-        // Salvar token no localStorage
-        const token = response.data?.token || response.data
-        localStorage.setItem('authToken', token)
-        
-        // Redirecionar para home
-        navigate('/home')
+        // Lógica de login
+        await authService.login(formData.email, formData.password)
+        alert('Login realizado com sucesso!')
+        navigate('/manage')
       } else {
-        // Cadastro
+        // Lógica de cadastro
         if (formData.password !== formData.confirmPassword) {
           setError('Senhas não coincidem!')
           setLoading(false)
           return
         }
-
-        const response = await apiClient.post('/auth/register', {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password
-        })
-
-        // Salvar token e redirecionar
-        const token = response.data?.token || response.data
-        localStorage.setItem('authToken', token)
+        await authService.register(formData.name, formData.email, formData.password)
+        alert('Cadastro realizado com sucesso!')
         navigate('/home')
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Erro ao processar requisição. Tente novamente.')
       console.error('Erro:', err)
+      setError(err.message || 'Erro ao processar sua solicitação. Verifique suas credenciais.')
     } finally {
       setLoading(false)
     }
@@ -98,8 +82,6 @@ const Login = () => {
           </div>
 
         <form onSubmit={handleSubmit} className='login-form'>
-          {error && <div className='error-message'>{error}</div>}
-
           {!isLogin && (
             <div className='form-group'>
               <label htmlFor='name'>Nome completo</label>
@@ -111,7 +93,6 @@ const Login = () => {
                 onChange={handleInputChange}
                 placeholder='Digite seu nome completo'
                 required
-                disabled={loading}
               />
             </div>
           )}
@@ -126,7 +107,6 @@ const Login = () => {
               onChange={handleInputChange}
               placeholder='Digite seu e-mail'
               required
-              disabled={loading}
             />
           </div>
 
@@ -140,7 +120,6 @@ const Login = () => {
               onChange={handleInputChange}
               placeholder='Digite sua senha'
               required
-              disabled={loading}
             />
           </div>
 
@@ -155,8 +134,20 @@ const Login = () => {
                 onChange={handleInputChange}
                 placeholder='Confirme sua senha'
                 required
-                disabled={loading}
               />
+            </div>
+          )}
+
+          {error && (
+            <div className='error-message' style={{
+              color: '#e74c3c',
+              backgroundColor: '#fadbd8',
+              padding: '10px',
+              borderRadius: '5px',
+              marginBottom: '15px',
+              fontSize: '14px'
+            }}>
+              {error}
             </div>
           )}
 
