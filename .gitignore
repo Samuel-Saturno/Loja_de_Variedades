@@ -1,36 +1,12 @@
-# Build artifacts
 **/target/
 **/target/*
-
-# Local H2 database files
 **/data/*.mv.db
 **/data/*.trace.db
-
-# Node/npm
 **/node_modules/
 package-lock.json
-
-# Logs
 *.log
-
-# OS
 .DS_Store
-
-# Java
 *.jar
-
-# Ensure local H2 DB and presentation data are ignored
-# (cover common patterns and the backend data folder)
 loja-variedades-back/data/
 loja-variedades-back/target/
-
-# Ignore built static assets copied into backend during presentation builds
 loja-variedades-back/src/main/resources/static/
-
-# Presentation materials (private)
-docs/pitch.md
-ANTONIO_NOGUEIRA_GUIA_ESTUDO.md
-CHECKLIST_APRESENTACAO.md
-
-# VS Code settings (personal)
-.vscode/
