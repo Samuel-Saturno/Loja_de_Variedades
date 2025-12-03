@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import './index.css'
 import { useNavigate } from 'react-router-dom'
 import { IoArrowBack } from 'react-icons/io5'
+import { MdCloudUpload } from 'react-icons/md'
 import productService from '../../services/productService'
 
 const AddProduct = () => {
@@ -10,11 +11,21 @@ const AddProduct = () => {
         description: '',
         price: '',
         stockQuantity: '',
+        categoryId: '1',
         imageUrl: ''
     })
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
     const navigate = useNavigate()
+
+    const categories = [
+        { id: 1, name: 'Perfumes' },
+        { id: 2, name: 'Eletrônicos' },
+        { id: 3, name: 'Plásticos' },
+        { id: 4, name: 'Alumínios' },
+        { id: 5, name: 'Calçados' },
+        { id: 6, name: 'Higiene' }
+    ]
 
     const handleInputChange = (e) => {
         const { name, value } = e.target
@@ -27,31 +38,25 @@ const AddProduct = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        setError('')
         setIsLoading(true)
+        setError('')
 
         try {
-            // Validar campos obrigatórios
-            if (!formData.name || !formData.price || !formData.stockQuantity) {
-                setError('Preencha todos os campos obrigatórios')
-                setIsLoading(false)
-                return
-            }
-
-            const product = {
+            const productData = {
                 name: formData.name,
                 description: formData.description,
                 price: parseFloat(formData.price),
                 stockQuantity: parseInt(formData.stockQuantity),
-                imageUrl: formData.imageUrl
+                categoryId: parseInt(formData.categoryId),
+                imageUrl: formData.imageUrl || 'https://via.placeholder.com/300x300?text=Sem+Imagem'
             }
 
-            await productService.create(product)
+            await productService.create(productData)
             alert('Produto adicionado com sucesso!')
             navigate('/manage')
         } catch (err) {
-            setError(err.message || 'Erro ao adicionar produto')
-            console.error('Erro:', err)
+            console.error('Erro ao adicionar produto:', err)
+            setError('Erro ao adicionar produto. Verifique os dados e tente novamente.')
         } finally {
             setIsLoading(false)
         }
@@ -71,9 +76,19 @@ const AddProduct = () => {
             </div>
 
             <div className='add-product-form-container'>
-                {error && <div className='error-message'>{error}</div>}
-                
                 <form onSubmit={handleSubmit} className='add-product-form'>
+                    {error && (
+                        <div style={{
+                            color: '#e74c3c',
+                            backgroundColor: '#fadbd8',
+                            padding: '10px',
+                            borderRadius: '5px',
+                            marginBottom: '15px'
+                        }}>
+                            {error}
+                        </div>
+                    )}
+
                     <div className='form-row'>
                         <div className='form-group'>
                             <label htmlFor='name'>Nome do Produto *</label>
@@ -85,13 +100,29 @@ const AddProduct = () => {
                                 onChange={handleInputChange}
                                 placeholder='Digite o nome do produto'
                                 required
-                                disabled={isLoading}
                             />
+                        </div>
+
+                        <div className='form-group'>
+                            <label htmlFor='categoryId'>Categoria *</label>
+                            <select
+                                id='categoryId'
+                                name='categoryId'
+                                value={formData.categoryId}
+                                onChange={handleInputChange}
+                                required
+                            >
+                                {categories.map((category) => (
+                                    <option key={category.id} value={category.id}>
+                                        {category.name}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
 
                     <div className='form-group'>
-                        <label htmlFor='description'>Descrição</label>
+                        <label htmlFor='description'>Descrição *</label>
                         <textarea
                             id='description'
                             name='description'
@@ -99,7 +130,7 @@ const AddProduct = () => {
                             onChange={handleInputChange}
                             placeholder='Digite a descrição do produto'
                             rows={4}
-                            disabled={isLoading}
+                            required
                         />
                     </div>
 
@@ -112,11 +143,10 @@ const AddProduct = () => {
                                 name='price'
                                 value={formData.price}
                                 onChange={handleInputChange}
-                                placeholder='0,00'
+                                placeholder='0.00'
                                 min='0'
                                 step='0.01'
                                 required
-                                disabled={isLoading}
                             />
                         </div>
 
@@ -130,24 +160,40 @@ const AddProduct = () => {
                                 onChange={handleInputChange}
                                 placeholder='0'
                                 min='0'
+                                step='1'
                                 required
-                                disabled={isLoading}
                             />
                         </div>
                     </div>
 
                     <div className='form-group'>
-                        <label htmlFor='imageUrl'>URL da Imagem</label>
+                        <label htmlFor='imageUrl'>URL da Imagem (opcional)</label>
                         <input
-                            type='url'
+                            type='text'
                             id='imageUrl'
                             name='imageUrl'
                             value={formData.imageUrl}
                             onChange={handleInputChange}
                             placeholder='https://exemplo.com/imagem.jpg'
-                            disabled={isLoading}
                         />
+                        <small style={{ color: '#666', fontSize: '12px', marginTop: '5px', display: 'block' }}>
+                            Cole o link de uma imagem da web ou deixe em branco para usar imagem padrão
+                        </small>
                     </div>
+
+                    {formData.imageUrl && (
+                        <div className='image-preview-container'>
+                            <label>Pré-visualização da Imagem</label>
+                            <img
+                                src={formData.imageUrl}
+                                alt='Preview'
+                                className='image-preview'
+                                onError={(e) => {
+                                    e.target.src = 'https://via.placeholder.com/300x300?text=Imagem+Inválida'
+                                }}
+                            />
+                        </div>
+                    )}
 
                     <div className='form-actions'>
                         <button
