@@ -11,24 +11,32 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class AdminUserInitializer {
 
     @Bean
-    public CommandLineRunner createAdmin(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public CommandLineRunner createTestUsers(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
         return args -> {
+            // Criar usuário comum para testes
+            String userEmail = "usuario@loja.com";
+            var existingUser = userRepository.findByEmail(userEmail);
+            if (existingUser.isEmpty()) {
+                User user = new User();
+                user.setName("Usuário Comum");
+                user.setEmail(userEmail);
+                user.setPasswordHash(passwordEncoder.encode("123456"));
+                user.setRole("USER");
+                userRepository.save(user);
+                System.out.println("[TestUsers] Usuário comum criado: " + userEmail + " / senha: 123456");
+            }
+
+            // Criar admin para gerenciamento
             String adminEmail = "admin@loja.com";
-            var existing = userRepository.findByEmail(adminEmail);
-            if (existing.isEmpty()) {
-                User u = new User();
-                u.setName("Admin");
-                u.setEmail(adminEmail);
-                u.setPasswordHash(passwordEncoder.encode("admin123"));
-                u.setRole("ADMIN");
-                userRepository.save(u);
-                System.out.println("[AdminUserInitializer] Admin user created: " + adminEmail + " / password: admin123");
-            } else {
-                var u = existing.get();
-                u.setPasswordHash(passwordEncoder.encode("admin123"));
-                u.setRole("ADMIN");
-                userRepository.save(u);
-                System.out.println("[AdminUserInitializer] Admin user updated (password reset): " + adminEmail + " / password: admin123");
+            var existingAdmin = userRepository.findByEmail(adminEmail);
+            if (existingAdmin.isEmpty()) {
+                User admin = new User();
+                admin.setName("Administrador");
+                admin.setEmail(adminEmail);
+                admin.setPasswordHash(passwordEncoder.encode("admin123"));
+                admin.setRole("ADMIN");
+                userRepository.save(admin);
+                System.out.println("[TestUsers] Admin criado: " + adminEmail + " / senha: admin123");
             }
         };
     }
