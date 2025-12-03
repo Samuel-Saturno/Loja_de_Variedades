@@ -10,3 +10,4 @@ package-lock.json
 loja-variedades-back/data/
 loja-variedades-back/target/
 loja-variedades-back/src/main/resources/static/
+.vscode/
