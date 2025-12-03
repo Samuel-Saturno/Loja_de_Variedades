@@ -1,101 +1,55 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import './index.css'
-import productService from '../../services/productService'
+import { ProductMocks } from './mocks'
 
 const Product = ({ searchTerm, selectedCategory }) => {
-  const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [page, setPage] = useState(0)
-  const [hasMore, setHasMore] = useState(true)
+  const filteredProducts = ProductMocks.filter(product => {
+    // Filtro por categoria
+    const categoryMatch = selectedCategory === 'Todos' || 
+                         product.category === selectedCategory
+    
+    // Filtro por busca
+    const searchMatch = !searchTerm || 
+                       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                       product.description.toLowerCase().includes(searchTerm.toLowerCase())
+    
+    return categoryMatch && searchMatch
+  })
 
-  // Buscar produtos do backend
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true)
-      setError('')
-      try {
-        const data = await productService.getAll(page, 10, searchTerm, selectedCategory)
-        
-        if (page === 0) {
-          setProducts(data.content || data)
-        } else {
-          setProducts(prev => [...prev, ...(data.content || data)])
-        }
-        
-        // Verifica se há mais páginas
-        setHasMore(!data.last)
-      } catch (err) {
-        setError('Erro ao carregar produtos')
-        console.error('Erro:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchProducts()
-  }, [searchTerm, selectedCategory, page])
-
-  // Resetar paginação quando filtros mudam
-  useEffect(() => {
-    setPage(0)
-  }, [searchTerm, selectedCategory])
-
-  const handleLoadMore = () => {
-    if (hasMore && !loading) {
-      setPage(prev => prev + 1)
-    }
-  }
-
-  if (loading && page === 0) {
-    return (
-      <div className='product-main-container'>
-        <div className="product-container">
-          <div className='loading'>Carregando produtos...</div>
-        </div>
-      </div>
-    )
-  }
-
-  if (error && page === 0) {
-    return (
-      <div className='product-main-container'>
-        <div className="product-container">
-          <div className='error'>{error}</div>
-        </div>
-      </div>
-    )
+  const handleAddToCart = (product) => {
+    // Aqui você pode implementar a lógica para adicionar o produto à sacola
+    console.log('Produto adicionado à sacola:', product)
+    // Exemplo: dispatch(addToCart(product)) se estiver usando Redux
+    // ou chamar uma função passada como prop
   }
 
   return (
     <div className='product-main-container'>
         <div className="product-container">
             <div className='product-grid'>
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                     <div key={product.id} className='product-card'>
                         <div className='product-image-container'>
                             <img 
-                                src={product.imageUrl || 'https://via.placeholder.com/300'} 
+                                src={product.image} 
                                 alt={product.name}
                                 className='product-image'
                             />
                         </div>
                         <span className='product-name'>{product.name}</span>
                         <span className='product-description'>{product.description}</span>
-                        <span className='product-price'>R$ {Number(product.price).toFixed(2)}</span>
+                        <div className='product-footer'>
+                            <span className='product-price'>R$ {product.price.toFixed(2)}</span>
+                            <button 
+                                className='add-to-cart-btn'
+                                onClick={() => handleAddToCart(product)}
+                            >
+                                Adicionar à sacola
+                            </button>
+                        </div>
                     </div>
                 ))}
             </div>
-            
-            {hasMore && !loading && (
-              <button onClick={handleLoadMore} className='load-more-button'>
-                Carregar mais produtos
-              </button>
-            )}
-            
-            {loading && page > 0 && (
-              <div className='loading'>Carregando mais produtos...</div>
-            )}
         </div>
     </div>
   )

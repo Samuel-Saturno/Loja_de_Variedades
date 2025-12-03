@@ -1,54 +1,43 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import './index.css'
 import { useNavigate } from 'react-router-dom'
 import { IoArrowBack, IoSearch } from 'react-icons/io5'
 import { MdEdit } from 'react-icons/md'
-import productService from '../../services/productService'
+import { ProductMocks } from '../../components/Product/mocks'
+
 
 const EditProduct = () => {
-  const [products, setProducts] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('Todos')
   const [editingProduct, setEditingProduct] = useState(null)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
-    stockQuantity: '',
-    imageUrl: ''
+    quantity: '',
+    category: '',
+    image: null,
+    imagePreview: null
   })
   const [isLoading, setIsLoading] = useState(false)
-  const [loadingList, setLoadingList] = useState(false)
-  const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  // Carregar produtos ao montar
-  useEffect(() => {
-    fetchProducts()
-  }, [])
+  const categories = ['Todos', 'Perfumes', 'Eletrônicos', 'Plásticos', 'Alumínios', 'Calçados', 'Higiene']
 
-  const fetchProducts = async () => {
-    setLoadingList(true)
-    setError('')
-    try {
-      const data = await productService.getAll(0, 100, searchQuery)
-      setProducts(data.content || data)
-    } catch (err) {
-      setError('Erro ao carregar produtos')
-      console.error('Erro:', err)
-    } finally {
-      setLoadingList(false)
-    }
-  }
-
-  // Filtrar produtos baseado na busca
-  const filteredProducts = products.filter(product => {
+  // Filtrar produtos baseado na busca e categoria
+  const filteredProducts = ProductMocks.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          product.description.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesSearch
+    const matchesCategory = categoryFilter === 'Todos' || product.category === categoryFilter
+    return matchesSearch && matchesCategory
   })
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value)
+  }
+
+  const handleCategoryChange = (e) => {
+    setCategoryFilter(e.target.value)
   }
 
   const handleEditClick = (product) => {
@@ -57,8 +46,10 @@ const EditProduct = () => {
       name: product.name,
       description: product.description,
       price: product.price.toString(),
-      stockQuantity: product.stockQuantity.toString(),
-      imageUrl: product.imageUrl
+      quantity: product.quantity ? product.quantity.toString() : '0',
+      category: product.category,
+      image: null,
+      imagePreview: product.image
     })
   }
 
@@ -68,43 +59,42 @@ const EditProduct = () => {
       ...formData,
       [name]: value
     })
-    setError('')
   }
 
-  const handleImageUrlChange = (e) => {
-    setFormData({
-      ...formData,
-      imageUrl: e.target.value
-    })
+  const handleImageChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setFormData({
+          ...formData,
+          image: file,
+          imagePreview: reader.result
+        })
+      }
+      reader.readAsDataURL(file)
+    }
   }
 
   const handleUpdateProduct = async (e) => {
     e.preventDefault()
-    setError('')
     setIsLoading(true)
 
     try {
-      if (!formData.name || !formData.price || !formData.stockQuantity) {
-        setError('Preencha todos os campos obrigatórios')
-        setIsLoading(false)
-        return
-      }
-
-      const product = {
-        name: formData.name,
-        description: formData.description,
-        price: parseFloat(formData.price),
-        stockQuantity: parseInt(formData.stockQuantity),
-        imageUrl: formData.imageUrl
-      }
-
-      await productService.update(editingProduct.id, product)
+      // Simular atualização do produto
+      console.log('Produto atualizado:', {
+        id: editingProduct.id,
+        ...formData,
+        price: parseFloat(formData.price)
+      })
+      
+      // Simular delay da API
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
       alert('Produto atualizado com sucesso!')
       setEditingProduct(null)
-      fetchProducts()
-    } catch (err) {
-      setError(err.message || 'Erro ao atualizar produto')
-      console.error('Erro:', err)
+    } catch (error) {
+      alert('Erro ao atualizar produto')
     } finally {
       setIsLoading(false)
     }
@@ -120,10 +110,11 @@ const EditProduct = () => {
       name: '',
       description: '',
       price: '',
-      stockQuantity: '',
-      imageUrl: ''
+      quantity: '',
+      category: '',
+      image: null,
+      imagePreview: null
     })
-    setError('')
   }
 
   // Se está editando um produto, mostra o formulário
@@ -138,8 +129,6 @@ const EditProduct = () => {
         </div>
 
         <div className='edit-product-form-container'>
-          {error && <div className='error-message'>{error}</div>}
-          
           <form onSubmit={handleUpdateProduct} className='edit-product-form'>
             <div className='edit-form-row'>
               <div className='edit-form-group'>
@@ -151,20 +140,36 @@ const EditProduct = () => {
                   value={formData.name}
                   onChange={handleFormInputChange}
                   required
-                  disabled={isLoading}
                 />
+              </div>
+
+              <div className='edit-form-group'>
+                <label htmlFor='edit-category'>Categoria *</label>
+                <select
+                  id='edit-category'
+                  name='category'
+                  value={formData.category}
+                  onChange={handleFormInputChange}
+                  required
+                >
+                  {categories.filter(cat => cat !== 'Todos').map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
             <div className='edit-form-group'>
-              <label htmlFor='edit-description'>Descrição</label>
+              <label htmlFor='edit-description'>Descrição *</label>
               <textarea
                 id='edit-description'
                 name='description'
                 value={formData.description}
                 onChange={handleFormInputChange}
                 rows={4}
-                disabled={isLoading}
+                required
               />
             </div>
 
@@ -180,46 +185,44 @@ const EditProduct = () => {
                   min='0'
                   step='0.01'
                   required
-                  disabled={isLoading}
                 />
               </div>
 
               <div className='edit-form-group'>
-                <label htmlFor='edit-stock'>Quantidade em Estoque *</label>
+                <label htmlFor='edit-quantity'>Quantidade em Estoque *</label>
                 <input
                   type='number'
-                  id='edit-stock'
-                  name='stockQuantity'
-                  value={formData.stockQuantity}
+                  id='edit-quantity'
+                  name='quantity'
+                  value={formData.quantity}
                   onChange={handleFormInputChange}
                   min='0'
+                  step='1'
                   required
-                  disabled={isLoading}
                 />
               </div>
             </div>
 
-            <div className='edit-form-group'>
-              <label htmlFor='edit-image'>URL da Imagem</label>
-              <input
-                type='url'
-                id='edit-image'
-                name='imageUrl'
-                value={formData.imageUrl}
-                onChange={handleImageUrlChange}
-                placeholder='https://exemplo.com/imagem.jpg'
-                disabled={isLoading}
-              />
+            <div className='edit-form-row'>
+              <div className='edit-form-group'>
+                <label htmlFor='edit-image'>Nova Imagem (opcional)</label>
+                <input
+                  type='file'
+                  id='edit-image'
+                  accept='image/*'
+                  onChange={handleImageChange}
+                  className='edit-image-input'
+                />
+              </div>
             </div>
 
-            {formData.imageUrl && (
+            {formData.imagePreview && (
               <div className='edit-image-preview-container'>
                 <label>Pré-visualização</label>
                 <img 
-                  src={formData.imageUrl} 
+                  src={formData.imagePreview} 
                   alt='Preview' 
                   className='edit-image-preview'
-                  onError={(e) => { e.target.src = 'https://via.placeholder.com/300' }}
                 />
               </div>
             )}
@@ -269,6 +272,18 @@ const EditProduct = () => {
               className='edit-search-input'
             />
           </div>
+          
+          <select
+            value={categoryFilter}
+            onChange={handleCategoryChange}
+            className='edit-category-filter'
+          >
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className='edit-results-info'>
@@ -277,11 +292,7 @@ const EditProduct = () => {
       </div>
 
       <div className='edit-products-list-section'>
-        {loadingList ? (
-          <div className='loading'>Carregando produtos...</div>
-        ) : error ? (
-          <div className='error'>{error}</div>
-        ) : filteredProducts.length === 0 ? (
+        {filteredProducts.length === 0 ? (
           <div className='edit-no-products'>
             <p>Nenhum produto encontrado</p>
           </div>
@@ -291,7 +302,7 @@ const EditProduct = () => {
               <div key={product.id} className='edit-product-item'>
                 <div className='edit-product-image-wrapper'>
                   <img 
-                    src={product.imageUrl || 'https://via.placeholder.com/300'} 
+                    src={product.image} 
                     alt={product.name}
                     className='edit-product-item-image'
                   />
@@ -301,8 +312,8 @@ const EditProduct = () => {
                   <h3 className='edit-product-item-name'>{product.name}</h3>
                   <p className='edit-product-item-description'>{product.description}</p>
                   <div className='edit-product-item-details'>
-                    <span className='edit-product-item-price'>R$ {Number(product.price).toFixed(2)}</span>
-                    <span className='edit-product-item-stock'>Estoque: {product.stockQuantity}</span>
+                    <span className='edit-product-item-category'>{product.category}</span>
+                    <span className='edit-product-item-price'>R$ {product.price.toFixed(2)}</span>
                   </div>
                 </div>
                 

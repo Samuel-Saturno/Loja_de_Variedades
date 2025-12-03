@@ -1,0 +1,9 @@
+.master-container {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Garantir que todas as páginas ocupem o espaço adequado */
+.master-container > * {
+  width: 100%;
+}

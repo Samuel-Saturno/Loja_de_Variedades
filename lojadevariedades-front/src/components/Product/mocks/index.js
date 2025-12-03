@@ -6,6 +6,7 @@ export const ProductMocks = [
         name: 'Perfume Masculino',
         description: 'Perfume importado de longa duração',
         price: 89.99,
+        quantity: 25,
         category: 'Perfumes',
         image: Images.TesteImage
     },
@@ -14,6 +15,7 @@ export const ProductMocks = [
         name: 'Smartphone Samsung',
         description: 'Eletrônico com ótima qualidade de câmera',
         price: 1299.99,
+        quantity: 8,
         category: 'Eletrônicos',
         image: Images.TesteImage
     },
@@ -22,6 +24,7 @@ export const ProductMocks = [
         name: 'Pote Plástico',
         description: 'Recipiente plástico para organização',
         price: 15.50,
+        quantity: 150,
         category: 'Plásticos',
         image: Images.TesteImage
     },
@@ -30,6 +33,7 @@ export const ProductMocks = [
         name: 'Panela Alumínio',
         description: 'Utensílio de cozinha em alumínio',
         price: 45.90,
+        quantity: 42,
         category: 'Alumínios',
         image: Images.TesteImage
     },
@@ -38,6 +42,7 @@ export const ProductMocks = [
         name: 'Tênis Esportivo',
         description: 'Calçado confortável para exercícios',
         price: 159.99,
+        quantity: 15,
         category: 'Calçados',
         image: Images.TesteImage
     },
@@ -46,6 +51,7 @@ export const ProductMocks = [
         name: 'Sabonete Líquido',
         description: 'Produto de higiene pessoal',
         price: 12.99,
+        quantity: 85,
         category: 'Higiene',
         image: Images.TesteImage
     },
