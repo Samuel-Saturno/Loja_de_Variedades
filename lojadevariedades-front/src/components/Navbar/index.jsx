@@ -10,10 +10,14 @@ import authService from '../../services/authService'
 const Navbar = ({ searchTerm, setSearchTerm, selectedCategory, setSelectedCategory }) => {
     const navigate = useNavigate()
     const [isAuthenticated, setIsAuthenticated] = useState(false)
+    const [isAdmin, setIsAdmin] = useState(false)
+    const [userEmail, setUserEmail] = useState('')
     const [showProfileMenu, setShowProfileMenu] = useState(false)
 
     useEffect(() => {
         setIsAuthenticated(authService.isAuthenticated())
+        setIsAdmin(authService.isAdmin())
+        setUserEmail(authService.getUserEmail() || '')
     }, [])
 
     const handleSearchChange = (e) => {
@@ -101,23 +105,25 @@ const Navbar = ({ searchTerm, setSearchTerm, selectedCategory, setSelectedCatego
                                     minWidth: '180px',
                                     zIndex: 1000
                                 }}>
-                                    <div 
-                                        onClick={handleManageClick}
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '10px',
-                                            padding: '10px',
-                                            cursor: 'pointer',
-                                            borderRadius: '5px',
-                                            transition: 'background 0.2s'
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                                    >
-                                        <MdSettings size={20} />
-                                        <span>Gerenciar Loja</span>
-                                    </div>
+                                    {isAdmin && (
+                                        <div 
+                                            onClick={handleManageClick}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '10px',
+                                                padding: '10px',
+                                                cursor: 'pointer',
+                                                borderRadius: '5px',
+                                                transition: 'background 0.2s'
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+                                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                        >
+                                            <MdSettings size={20} />
+                                            <span>Gerenciar Loja</span>
+                                        </div>
+                                    )}
                                     <div 
                                         onClick={handleLogoutClick}
                                         style={{
@@ -142,7 +148,9 @@ const Navbar = ({ searchTerm, setSearchTerm, selectedCategory, setSelectedCatego
                     </div>
                     <h3 className="optionbar-h3">
                         {isAuthenticated ? (
-                            <span style={{ color: "#28a745" }}>Bem-vindo, Admin!</span>
+                            <span style={{ color: "#28a745" }}>
+                                Olá, {isAdmin ? 'Admin' : 'Cliente'}!
+                            </span>
                         ) : (
                             <>
                                 Não tem uma conta? <span

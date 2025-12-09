@@ -34,8 +34,14 @@ const Login = () => {
       if (isLogin) {
         // Lógica de login
         await authService.login(formData.email, formData.password)
+        const userRole = authService.getUserRole()
         alert('Login realizado com sucesso!')
-        navigate('/manage')
+        // Redireciona baseado na role
+        if (userRole === 'ADMIN') {
+          navigate('/manage')
+        } else {
+          navigate('/home')
+        }
       } else {
         // Lógica de cadastro
         if (formData.password !== formData.confirmPassword) {
