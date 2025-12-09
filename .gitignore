@@ -1,0 +1,13 @@
+**/target/
+**/target/*
+**/data/*.mv.db
+**/data/*.trace.db
+**/node_modules/
+package-lock.json
+*.log
+.DS_Store
+*.jar
+loja-variedades-back/data/
+loja-variedades-back/target/
+loja-variedades-back/src/main/resources/static/
+.vscode/

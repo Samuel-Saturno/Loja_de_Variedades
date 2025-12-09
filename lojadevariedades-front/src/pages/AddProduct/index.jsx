@@ -3,20 +3,29 @@ import './index.css'
 import { useNavigate } from 'react-router-dom'
 import { IoArrowBack } from 'react-icons/io5'
 import { MdCloudUpload } from 'react-icons/md'
+import productService from '../../services/productService'
 
 const AddProduct = () => {
     const [formData, setFormData] = useState({
         name: '',
         description: '',
         price: '',
-        category: 'Perfumes',
-        image: null,
-        imagePreview: null
+        stockQuantity: '',
+        categoryId: '1',
+        imageUrl: ''
     })
     const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState('')
     const navigate = useNavigate()
 
-    const categories = ['Perfumes', 'Eletrônicos', 'Plásticos', 'Alumínios', 'Calçados', 'Higiene']
+    const categories = [
+        { id: 1, name: 'Perfumes' },
+        { id: 2, name: 'Eletrônicos' },
+        { id: 3, name: 'Plásticos' },
+        { id: 4, name: 'Alumínios' },
+        { id: 5, name: 'Calçados' },
+        { id: 6, name: 'Higiene' }
+    ]
 
     const handleInputChange = (e) => {
         const { name, value } = e.target
@@ -24,43 +33,31 @@ const AddProduct = () => {
             ...formData,
             [name]: value
         })
-    }
-
-    const handleImageChange = (e) => {
-        const file = e.target.files[0]
-        if (file) {
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                setFormData({
-                    ...formData,
-                    image: file,
-                    imagePreview: reader.result
-                })
-            }
-            reader.readAsDataURL(file)
-        }
+        setError('')
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
         setIsLoading(true)
+        setError('')
 
-        // Simular adição do produto
         try {
-            // Aqui seria feita a requisição para a API
-            console.log('Produto adicionado:', {
-                ...formData,
-                id: Date.now(), // ID temporário
-                image: formData.imagePreview || '/placeholder-image.jpg'
-            })
+            const productData = {
+                name: formData.name,
+                description: formData.description,
+                price: parseFloat(formData.price),
+                stockQuantity: parseInt(formData.stockQuantity),
+                categoryId: parseInt(formData.categoryId),
+                imageUrl: formData.imageUrl || 'https://via.placeholder.com/300x300?text=Sem+Imagem'
+            }
 
-            // Simular delay da API
-            await new Promise(resolve => setTimeout(resolve, 1500))
-
+            await productService.create(productData)
             alert('Produto adicionado com sucesso!')
+            window.dispatchEvent(new Event('productUpdated'))
             navigate('/manage')
-        } catch (error) {
-            alert('Erro ao adicionar produto')
+        } catch (err) {
+            console.error('Erro ao adicionar produto:', err)
+            setError('Erro ao adicionar produto. Verifique os dados e tente novamente.')
         } finally {
             setIsLoading(false)
         }
@@ -81,6 +78,18 @@ const AddProduct = () => {
 
             <div className='add-product-form-container'>
                 <form onSubmit={handleSubmit} className='add-product-form'>
+                    {error && (
+                        <div style={{
+                            color: '#e74c3c',
+                            backgroundColor: '#fadbd8',
+                            padding: '10px',
+                            borderRadius: '5px',
+                            marginBottom: '15px'
+                        }}>
+                            {error}
+                        </div>
+                    )}
+
                     <div className='form-row'>
                         <div className='form-group'>
                             <label htmlFor='name'>Nome do Produto *</label>
@@ -96,17 +105,17 @@ const AddProduct = () => {
                         </div>
 
                         <div className='form-group'>
-                            <label htmlFor='category'>Categoria *</label>
+                            <label htmlFor='categoryId'>Categoria *</label>
                             <select
-                                id='category'
-                                name='category'
-                                value={formData.category}
+                                id='categoryId'
+                                name='categoryId'
+                                value={formData.categoryId}
                                 onChange={handleInputChange}
                                 required
                             >
                                 {categories.map((category) => (
-                                    <option key={category} value={category}>
-                                        {category}
+                                    <option key={category.id} value={category.id}>
+                                        {category.name}
                                     </option>
                                 ))}
                             </select>
@@ -135,7 +144,7 @@ const AddProduct = () => {
                                 name='price'
                                 value={formData.price}
                                 onChange={handleInputChange}
-                                placeholder='0,00'
+                                placeholder='0.00'
                                 min='0'
                                 step='0.01'
                                 required
@@ -143,30 +152,46 @@ const AddProduct = () => {
                         </div>
 
                         <div className='form-group'>
-                            <label htmlFor='image'>Imagem do Produto</label>
-                            <div className='image-upload-container'>
-                                <input
-                                    type='file'
-                                    id='image'
-                                    accept='image/*'
-                                    onChange={handleImageChange}
-                                    className='image-input'
-                                />
-                                <label htmlFor='image' className='image-upload-label'>
-                                    <MdCloudUpload size={24} />
-                                    <span>Clique para selecionar uma imagem</span>
-                                </label>
-                            </div>
+                            <label htmlFor='stockQuantity'>Quantidade em Estoque *</label>
+                            <input
+                                type='number'
+                                id='stockQuantity'
+                                name='stockQuantity'
+                                value={formData.stockQuantity}
+                                onChange={handleInputChange}
+                                placeholder='0'
+                                min='0'
+                                step='1'
+                                required
+                            />
                         </div>
                     </div>
 
-                    {formData.imagePreview && (
+                    <div className='form-group'>
+                        <label htmlFor='imageUrl'>URL da Imagem (opcional)</label>
+                        <input
+                            type='text'
+                            id='imageUrl'
+                            name='imageUrl'
+                            value={formData.imageUrl}
+                            onChange={handleInputChange}
+                            placeholder='https://exemplo.com/imagem.jpg'
+                        />
+                        <small style={{ color: '#666', fontSize: '12px', marginTop: '5px', display: 'block' }}>
+                            Cole o link de uma imagem da web ou deixe em branco para usar imagem padrão
+                        </small>
+                    </div>
+
+                    {formData.imageUrl && (
                         <div className='image-preview-container'>
                             <label>Pré-visualização da Imagem</label>
                             <img
-                                src={formData.imagePreview}
+                                src={formData.imageUrl}
                                 alt='Preview'
                                 className='image-preview'
+                                onError={(e) => {
+                                    e.target.src = 'https://via.placeholder.com/300x300?text=Imagem+Inválida'
+                                }}
                             />
                         </div>
                     )}

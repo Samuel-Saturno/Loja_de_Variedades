@@ -1,28 +1,316 @@
-# Loja Variedades - Backend (Spring Boot)
+# 🛍️ Loja de Variedades
 
+## 📋 Sobre o Projeto
 
-## Instruções rápidas
+**Loja de Variedades** é um sistema completo de e-commerce desenvolvido como projeto acadêmico, simulando uma loja online real com funcionalidades de catálogo de produtos, carrinho de compras, autenticação de usuários e painel administrativo para gerenciamento.
 
+O projeto demonstra a aplicação de conceitos de desenvolvimento full-stack, incluindo arquitetura em camadas, REST APIs, autenticação JWT, persistência de dados e interface responsiva.
 
-1. Certifique-se de ter Java 17 e Maven instalados.
-2. Configure as variáveis de ambiente ou use o docker-compose.
+---
 
+## ✨ Principais Funcionalidades
 
-Para rodar com o Maven
+### Para Clientes:
+- 🔍 Navegar catálogo de produtos com imagens e descrições
+- 🏷️ Filtrar produtos por categoria (Perfumes, Eletrônicos, Plásticos, Alumínios, Calçados, Higiene)
+- 🛒 Adicionar produtos ao carrinho de compras
+- ➕ ➖ Ajustar quantidades e remover itens do carrinho
+- 💾 Carrinho persiste mesmo fechando o navegador (localStorage)
+- 🔐 Login seguro com autenticação JWT
+- 💳 Finalizar compras (checkout simplificado)
+- 📱 Interface responsiva para mobile e desktop
 
-```mvn spring-boot:run```
+### Para Administradores:
+- ➕ Cadastrar novos produtos no sistema
+- ✏️ Editar informações de produtos existentes
+- 🗑️ Remover produtos descontinuados
+- 📊 Visualizar painel de gerenciamento
+- 🔒 Acesso protegido com role-based authorization
 
-A API estará em http://localhost:8080
+---
 
+## 🛠️ Tecnologias Utilizadas
 
-Endpoints principais:
-- POST /api/auth/register
-- POST /api/auth/login
-- GET /api/products
-- GET /api/products/{id}
-- CRUD admin: /api/admin/products
+### Backend
+- **Java 17** - Linguagem principal
+- **Spring Boot 3.x** - Framework web
+- **Spring Data JPA** - Persistência e ORM
+- **Spring Security** - Autenticação e autorização
+- **PostgreSQL** - Banco de dados relacional
+- **Flyway** - Migrações de schema
+- **Maven** - Gerenciamento de dependências
+- **JWT** - Tokens de autenticação stateless
 
+### Frontend
+- **React 18** - Biblioteca UI
+- **Vite** - Build tool e dev server
+- **Axios** - Cliente HTTP
+- **React Router** - Roteamento SPA
+- **CSS3** - Estilização
 
-Observações:
-- Troque `jwt.secret` por uma chave forte em produção.
-- Integrações com PSP (pagamentos) devem ser adicionadas conforme seu provedor.
+### DevOps
+- **Docker** - Containerização
+- **Git** - Controle de versão
+
+---
+
+## 📂 Estrutura do Repositório
+
+```
+Loja_de_Variedades/
+├── docs/                          # 📚 Documentação do projeto
+│   ├── arquitetura.md            # Arquitetura técnica detalhada
+│   ├── backlog.md                # Épicos e histórias de usuário
+│   └── pitch.md                  # Roteiro da apresentação
+│
+├── loja-variedades-back/         # 🔧 Backend (Spring Boot)
+│   ├── src/main/java/com/example/loja/
+│   │   ├── controller/           # Endpoints REST
+│   │   ├── service/              # Lógica de negócio
+│   │   ├── repository/           # Acesso a dados (JPA)
+│   │   ├── model/                # Entidades (Product, User, etc)
+│   │   ├── DTOs/                 # Data Transfer Objects
+│   │   ├── config/               # Configurações (Security, CORS)
+│   │   └── exception/            # Handlers de exceções
+│   ├── src/main/resources/
+│   │   ├── application.properties
+│   │   └── db/migration/         # Scripts Flyway
+│   └── pom.xml
+│
+├── lojadevariedades-front/       # 🎨 Frontend (React)
+│   ├── src/
+│   │   ├── pages/                # Páginas principais (rotas)
+│   │   ├── components/           # Componentes reutilizáveis
+│   │   ├── services/             # Abstrações de API
+│   │   └── api/                  # Cliente HTTP configurado
+│   ├── package.json
+│   └── vite.config.js
+│
+├── prototype/                     # 🚀 Protótipo navegável
+│   └── README.md                 # Instruções para acessar
+│
+└── scripts/                       # 📜 Scripts auxiliares
+    └── run_presentation.sh       # Script para apresentação
+```
+
+---
+
+## 🚀 Como Executar o Projeto
+
+### Pré-requisitos
+
+- **Java 17+** (JDK)
+- **Maven 3.8+**
+- **Node.js 18+** e **npm**
+- **PostgreSQL 14+** (ou Docker)
+- **Git**
+
+### 1️⃣ Clonar o Repositório
+
+```bash
+git clone https://github.com/Samuel-Saturno/Loja_de_Variedades.git
+cd Loja_de_Variedades
+```
+
+### 2️⃣ Configurar e Executar o Backend
+
+```bash
+cd loja-variedades-back
+
+# Configurar banco de dados (edite application.properties se necessário)
+# Padrão: PostgreSQL rodando em localhost:5432
+
+# Compilar o projeto
+./mvnw clean package -DskipTests
+
+# Executar o JAR compilado (RECOMENDADO)
+java -jar target/loja-variedades-backend-0.0.1-SNAPSHOT.jar
+
+# OU executar diretamente com Maven (não recomendado - pode usar código não compilado)
+./mvnw spring-boot:run
+```
+
+A API estará disponível em: **http://localhost:8080**
+
+**Endpoints principais:**
+- `POST /api/auth/login` - Login
+- `POST /api/auth/register` - Cadastro
+- `GET /api/products` - Listar todos os produtos
+- `GET /api/products?categoryId=1` - Filtrar por categoria
+- `POST /api/cart` - Adicionar ao carrinho
+- `POST /api/admin/products` - Criar produto (apenas admin)
+- `PUT /api/admin/products/{id}` - Editar produto (apenas admin)
+- `DELETE /api/admin/products/{id}` - Deletar produto (apenas admin)
+
+### 3️⃣ Configurar e Executar o Frontend
+
+```bash
+cd lojadevariedades-front
+
+# Instalar dependências
+npm install
+
+# Executar em modo desenvolvimento
+npm run dev
+```
+
+A aplicação estará disponível em: **http://localhost:5173**
+
+### 4️⃣ Parar os Serviços
+
+**Se estão rodando no terminal:**
+```bash
+# Pressione Ctrl+C no terminal onde o serviço está rodando
+```
+
+**Se estão rodando em background:**
+```bash
+# Encontrar o processo
+ps aux | grep java              # Backend
+ps aux | grep "npm run dev"    # Frontend
+
+# Matar pelo PID (número que aparece na segunda coluna)
+kill <PID>
+
+# Ou matar todos de uma vez
+killall java    # Para o backend
+killall node    # Para o frontend
+```
+
+**Verificar se as portas estão livres:**
+```bash
+lsof -i :8080   # Verifica porta do backend
+lsof -i :5173   # Verifica porta do frontend
+```
+
+### 5️⃣ (Opcional) Executar com Dockerizado
+
+Para apresentações ou testes rápidos, use o script que faz tudo automaticamente:
+
+```bash
+# Na raiz do projeto
+cd scripts
+./run_presentation.sh
+```
+
+O script vai:
+1. Verificar se Java, Node e PostgreSQL estão instalados
+2. Compilar o backend
+3. Instalar dependências do frontend
+4. Iniciar ambos os serviços em background
+5. Mostrar URLs e credenciais de teste
+
+**Para parar os serviços iniciados pelo script:**
+```bash
+kill $(cat /tmp/loja-backend.pid) && rm -f /tmp/loja-backend.pid
+kill $(cat /tmp/loja-frontend.pid) && rm -f /tmp/loja-frontend.pid
+```
+
+### 6️⃣ (Opcional) Executar com Docker
+
+```bash
+# Na raiz do projeto
+docker-compose up -d
+```
+
+---
+
+## 🧭 Como Navegar/Testar o Protótipo
+
+### Acesso como Cliente:
+1. Acesse `http://localhost:5173`
+2. Navegue pelo catálogo de produtos
+3. Adicione produtos ao carrinho
+4. Faça login (ou cadastre-se, se implementado)
+5. Finalize a compra no carrinho
+
+### Acesso como Administrador:
+1. Faça login com credenciais de admin:
+   - **Email:** `admin@loja.com`
+   - **Senha:** `admin123`
+2. Acesse o painel administrativo
+3. Gerencie produtos (adicionar, editar, excluir)
+
+### Fluxo de Teste Sugerido:
+```
+Home → Visualizar Produtos → Adicionar ao Carrinho → 
+Login → Revisar Carrinho → Finalizar Compra
+```
+
+**Dica:** Verifique o arquivo [`/prototype/README.md`](./prototype/README.md) para instruções detalhadas.
+
+---
+
+## 📖 Documentação Adicional
+
+> 💡 **Não sabe por onde começar?** Veja o **[Índice Completo de Documentação](./INDICE_DOCUMENTACAO.md)** com roteiros por perfil!
+
+### Documentos Principais:
+- **[Resumo Executivo](./RESUMO_EXECUTIVO.md)** - Visão de 1 página (recomendado para avaliação rápida)
+- **[Guia de Avaliação](./AVALIACAO.md)** - Roteiro completo para professora
+- **[Documentação Scrum](./docs/scrum.md)** - Sprints, cerimônias, dailies e retrospectivas
+- **[Arquitetura do Sistema](./docs/arquitetura.md)** - Separação de responsabilidades, fluxo, diagramas
+- **[Estrutura do Projeto](./docs/estrutura.md)** - Organização detalhada de pastas e arquivos
+- **[Backlog do Produto](./docs/backlog.md)** - Épicos, histórias de usuário e priorização
+- **[Guia de Integração](./GUIA_INTEGRACAO.md)** - Detalhes técnicos de API
+
+---
+
+## 👥 Integrantes do Grupo
+
+### Equipe de Desenvolvimento:
+
+- **Antonio Joaquim de Lira Neto** - Desenvolvedor Backend
+- **Samuel de Almeida Saturno** - Especialista em Banco de Dados
+- **Antonio Nogueira da Silva Neto** - Integração Backend/Frontend
+- **Luiz Eduardo de Almeida Rodrigues** - Desenvolvedor Frontend
+- **Francisco Lailson de Almeida** - Scrum Master e Apresentador
+
+### Informações Acadêmicas:
+
+- **Instituição:** Universidade Federal Rural do Semi-Árido (UFERSA)
+- **Disciplina:** Engenharia de Software
+- **Professora:** Huliane Medeiros da Silva
+- **Período:** 2025.2
+
+---
+
+## 📝 Licença
+
+Este projeto foi desenvolvido para fins acadêmicos e está disponível sob a licença MIT.
+
+---
+
+## 🔗 Links Úteis
+
+- [Documentação Spring Boot](https://spring.io/projects/spring-boot)
+- [Documentação React](https://react.dev/)
+- [Guia de JWT](https://jwt.io/introduction)
+- [PostgreSQL Docs](https://www.postgresql.org/docs/)
+
+---
+
+## 🤝 Contribuindo
+
+Para contribuir com o projeto:
+
+1. Faça um fork do repositório
+2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
+3. Commit suas mudanças (`git commit -m 'Adiciona MinhaFeature'`)
+4. Push para a branch (`git push origin feature/MinhaFeature`)
+5. Abra um Pull Request
+
+---
+
+## ⚠️ Observações Importantes
+
+- **Segurança:** Troque `jwt.secret` no `application.properties` por uma chave forte em produção
+- **Ambiente:** Configure variáveis de ambiente para credenciais sensíveis
+- **Pagamentos:** Sistema de pagamento real deve ser integrado com gateway (Stripe, PagSeguro, etc.)
+- **Testes:** Execute testes unitários com `mvn test` (backend) e `npm test` (frontend)
+
+---
+
+**Desenvolvido com ❤️ para a disciplina de Engenharia de Software**
+
+**Universidade Federal Rural do Semi-Árido (UFERSA) | 2025.2**

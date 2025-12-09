@@ -3,6 +3,7 @@ import './index.css'
 import { useNavigate } from 'react-router-dom'
 import Logo from '../../assets/img/logoarmarinho.jpg'
 import { IoArrowBack } from 'react-icons/io5'
+import authService from '../../services/authService'
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true)
@@ -12,6 +13,8 @@ const Login = () => {
     confirmPassword: '',
     name: ''
   })
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   const handleInputChange = (e) => {
@@ -19,23 +22,43 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value
     })
+    setError('')
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (isLogin) {
-      // Lógica de login
-      console.log('Login:', formData.email, formData.password)
-    } else {
-      // Lógica de cadastro
-      if (formData.password !== formData.confirmPassword) {
-        alert('Senhas não coincidem!')
-        return
+    setError('')
+    setLoading(true)
+    
+    try {
+      if (isLogin) {
+        // Lógica de login
+        await authService.login(formData.email, formData.password)
+        const userRole = authService.getUserRole()
+        alert('Login realizado com sucesso!')
+        // Redireciona baseado na role
+        if (userRole === 'ADMIN') {
+          navigate('/manage')
+        } else {
+          navigate('/home')
+        }
+      } else {
+        // Lógica de cadastro
+        if (formData.password !== formData.confirmPassword) {
+          setError('Senhas não coincidem!')
+          setLoading(false)
+          return
+        }
+        await authService.register(formData.name, formData.email, formData.password)
+        alert('Cadastro realizado com sucesso!')
+        navigate('/home')
       }
-      console.log('Cadastro:', formData)
+    } catch (err) {
+      console.error('Erro:', err)
+      setError(err.message || 'Erro ao processar sua solicitação. Verifique suas credenciais.')
+    } finally {
+      setLoading(false)
     }
-    // Navegar de volta para home após login/cadastro
-    navigate('/home')
   }
 
   const toggleMode = () => {
@@ -121,8 +144,21 @@ const Login = () => {
             </div>
           )}
 
-          <button type='submit' className='submit-button'>
-            {isLogin ? 'Entrar' : 'Criar conta'}
+          {error && (
+            <div className='error-message' style={{
+              color: '#e74c3c',
+              backgroundColor: '#fadbd8',
+              padding: '10px',
+              borderRadius: '5px',
+              marginBottom: '15px',
+              fontSize: '14px'
+            }}>
+              {error}
+            </div>
+          )}
+
+          <button type='submit' className='submit-button' disabled={loading}>
+            {loading ? 'Processando...' : (isLogin ? 'Entrar' : 'Criar conta')}
           </button>
         </form>
 
