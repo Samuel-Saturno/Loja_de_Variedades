@@ -12,8 +12,10 @@ O projeto demonstra a aplicação de conceitos de desenvolvimento full-stack, in
 
 ### Para Clientes:
 - 🔍 Navegar catálogo de produtos com imagens e descrições
+- 🏷️ Filtrar produtos por categoria (Perfumes, Eletrônicos, Plásticos, Alumínios, Calçados, Higiene)
 - 🛒 Adicionar produtos ao carrinho de compras
 - ➕ ➖ Ajustar quantidades e remover itens do carrinho
+- 💾 Carrinho persiste mesmo fechando o navegador (localStorage)
 - 🔐 Login seguro com autenticação JWT
 - 💳 Finalizar compras (checkout simplificado)
 - 📱 Interface responsiva para mobile e desktop
@@ -118,18 +120,27 @@ cd loja-variedades-back
 # Configurar banco de dados (edite application.properties se necessário)
 # Padrão: PostgreSQL rodando em localhost:5432
 
-# Compilar e executar
-mvn clean install
-mvn spring-boot:run
+# Compilar o projeto
+./mvnw clean package -DskipTests
+
+# Executar o JAR compilado (RECOMENDADO)
+java -jar target/loja-variedades-backend-0.0.1-SNAPSHOT.jar
+
+# OU executar diretamente com Maven (não recomendado - pode usar código não compilado)
+./mvnw spring-boot:run
 ```
 
 A API estará disponível em: **http://localhost:8080**
 
 **Endpoints principais:**
-- `POST /api/auth/login` - Autenticação
-- `GET /api/products` - Listar produtos
+- `POST /api/auth/login` - Login
+- `POST /api/auth/register` - Cadastro
+- `GET /api/products` - Listar todos os produtos
+- `GET /api/products?categoryId=1` - Filtrar por categoria
 - `POST /api/cart` - Adicionar ao carrinho
-- `POST /api/admin/products` - Criar produto (admin)
+- `POST /api/admin/products` - Criar produto (apenas admin)
+- `PUT /api/admin/products/{id}` - Editar produto (apenas admin)
+- `DELETE /api/admin/products/{id}` - Deletar produto (apenas admin)
 
 ### 3️⃣ Configurar e Executar o Frontend
 
@@ -145,7 +156,57 @@ npm run dev
 
 A aplicação estará disponível em: **http://localhost:5173**
 
-### 4️⃣ (Opcional) Executar com Docker
+### 4️⃣ Parar os Serviços
+
+**Se estão rodando no terminal:**
+```bash
+# Pressione Ctrl+C no terminal onde o serviço está rodando
+```
+
+**Se estão rodando em background:**
+```bash
+# Encontrar o processo
+ps aux | grep java              # Backend
+ps aux | grep "npm run dev"    # Frontend
+
+# Matar pelo PID (número que aparece na segunda coluna)
+kill <PID>
+
+# Ou matar todos de uma vez
+killall java    # Para o backend
+killall node    # Para o frontend
+```
+
+**Verificar se as portas estão livres:**
+```bash
+lsof -i :8080   # Verifica porta do backend
+lsof -i :5173   # Verifica porta do frontend
+```
+
+### 5️⃣ (Opcional) Executar com Dockerizado
+
+Para apresentações ou testes rápidos, use o script que faz tudo automaticamente:
+
+```bash
+# Na raiz do projeto
+cd scripts
+./run_presentation.sh
+```
+
+O script vai:
+1. Verificar se Java, Node e PostgreSQL estão instalados
+2. Compilar o backend
+3. Instalar dependências do frontend
+4. Iniciar ambos os serviços em background
+5. Mostrar URLs e credenciais de teste
+
+**Para parar os serviços iniciados pelo script:**
+```bash
+kill $(cat /tmp/loja-backend.pid) && rm -f /tmp/loja-backend.pid
+kill $(cat /tmp/loja-frontend.pid) && rm -f /tmp/loja-frontend.pid
+```
+
+### 6️⃣ (Opcional) Executar com Docker
 
 ```bash
 # Na raiz do projeto

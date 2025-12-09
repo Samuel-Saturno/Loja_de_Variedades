@@ -42,18 +42,21 @@ Desenvolver uma plataforma completa de e-commerce que permita:
 ## 📊 Escopo do Projeto
 
 ### ✅ Implementado (MVP)
-- **Épico 1:** Catálogo de Produtos (visualização, detalhes)
-- **Épico 2:** Carrinho de Compras (adicionar, remover, ajustar quantidades)
-- **Épico 3:** Autenticação (login cliente/admin, JWT, logout)
+- **Épico 1:** Catálogo de Produtos (visualização com categorias)
+- **Épico 2:** Carrinho de Compras (adicionar, remover, ajustar, persistência)
+- **Épico 3:** Autenticação (login cliente/admin com JWT, logout)
 - **Épico 4:** Gerenciamento Admin (CRUD completo de produtos)
 - **Épico 5:** Finalização de Compras (checkout básico)
 - **Épico 6:** UX/UI (design responsivo, feedback visual)
+- **Épico 8:** Categorização (6 categorias, filtro funcional)
 
-### 📈 Estatísticas
-- **Histórias de Usuário:** 13 histórias em 8 épicos (10 implementadas, 3 planejadas)
-- **Endpoints REST:** 15+ (produtos, autenticação, carrinho, pedidos)
+### 📈 Estatísticas Finais
+- **Histórias de Usuário:** 14 histórias em 9 épicos (11 completas, 1 parcial, 2 planejadas)
+- **Endpoints REST:** 18+ (produtos, categorias, autenticação, carrinho, pedidos)
 - **Páginas Frontend:** 7 (Home, Cart, Login, Manage, Add/Edit/Delete Product)
-- **Linhas de Código:** ~10.500 (3.500 Java, 2.800 React, 4.000 documentação)
+- **Categorias Funcionais:** 6 (Perfumes, Eletrônicos, Plásticos, Alumínios, Calçados, Higiene)
+- **Linhas de Código:** ~12.000 (4.000 Java, 3.500 React, 4.500 documentação)
+- **Sistema de Eventos:** Atualização automática de listas após operações CRUD
 
 ---
 
@@ -112,7 +115,8 @@ cd Loja_de_Variedades/scripts
 **Backend:**
 ```bash
 cd loja-variedades-back
-mvn spring-boot:run
+./mvnw clean package -DskipTests
+java -jar target/loja-variedades-backend-0.0.1-SNAPSHOT.jar
 # Acesse: http://localhost:8080
 ```
 
@@ -121,6 +125,12 @@ mvn spring-boot:run
 cd lojadevariedades-front
 npm install && npm run dev
 # Acesse: http://localhost:5173
+```
+
+**Para parar:**
+```bash
+# Pressione Ctrl+C nos terminais
+# Ou use: killall java && killall node
 ```
 
 ---
@@ -150,10 +160,11 @@ npm install && npm run dev
 
 ## 🏆 Destaques
 
-
-1. **Arquitetura sólida:** Separação clara, escalável, segura
-2. **Trabalho em equipe:** Divisão por especialidade, Scrum aplicado
-3. **MVP funcional:** Todas funcionalidades core implementadas
+1. **Arquitetura sólida:** Separação clara frontend/backend, escalável e segura
+2. **Integração completa:** Sistema de categorias, filtros e eventos funcionando perfeitamente
+3. **Trabalho em equipe:** Divisão por especialidade, Scrum aplicado fielmente
+4. **MVP funcional:** Todas funcionalidades principais implementadas e testadas
+5. **Documentação detalhada:** Guias completos de desenvolvimento, integração e apresentação
 
 ---
 

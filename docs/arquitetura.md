@@ -5,35 +5,91 @@
 O sistema segue uma arquitetura em três camadas principais:
 
 ### **Frontend (React + Vite)**
-- **Responsabilidade**: Interface do usuário, experiência de navegação e interação
+- **O que faz**: Mostra a interface para o usuário interagir com o sistema
 - **Componentes principais**:
-  - `Navbar` e `NavbarAdmin`: Navegação contextual por perfil
-  - `Product`: Exibição de produtos com imagens e informações
-  - `Cart`: Gerenciamento do carrinho de compras
+  - `Navbar` e `NavbarAdmin`: Menus diferentes para cliente e administrador
+  - `Product`: Mostra os produtos disponíveis com foto e preço
+  - `Cart`: Página do carrinho de compras
   - Páginas administrativas: `AddProduct`, `EditProduct`, `DeleteProduct`, `Manage`
-- **Comunicação**: API REST via `axios` através do módulo `apiClient.js`
+- **Como conversa com o backend**: Usa o arquivo `apiClient.js` que envia requisições HTTP para a API
+- **Armazenamento local**: Usa `localStorage` para guardar o token de login e itens do carrinho
 
 ### **Backend (Spring Boot + Java 17)**
-- **Responsabilidade**: Lógica de negócio, validação, persistência e autenticação
-- **Camadas**:
-  - **Controller**: Endpoints REST para produtos, autenticação e carrinho
-  - **Service**: Regras de negócio e orquestração
-  - **Repository**: Acesso aos dados via Spring Data JPA
-  - **Model**: Entidades do domínio (Product, User, CartItem)
-  - **DTOs**: Objetos de transferência para comunicação com o frontend
-  - **Exception**: Tratamento centralizado de erros
-- **Segurança**: JWT para autenticação e autorização (admin/cliente)
+- **O que faz**: Processa as regras de negócio, valida dados e gerencia a segurança
+- **Camadas** (organização do código):
+  - **Controller**: Recebe as requisições do frontend (ex: buscar produtos, fazer login)
+  - **Service**: Contém as regras do negócio (ex: calcular total do carrinho)
+  - **Repository**: Conversa com o banco de dados
+  - **Model**: Representa os dados (Product, User, CartItem, Category)
+  - **DTOs**: Objetos usados para enviar/receber dados do frontend
+  - **Exception**: Trata erros e envia mensagens claras para o frontend
+- **Segurança**: Usa JWT (token) para saber quem está logado (admin ou cliente)
 
 ### **Banco de Dados (PostgreSQL)**
-- **Responsabilidade**: Persistência estruturada de dados
-- **Estrutura**:
-  - Tabelas: `products`, `users`, `cart_items`, `orders`
-  - Migrações via Flyway (`V1__init.sql`)
-  - Relacionamentos: usuários possuem itens no carrinho e histórico de pedidos
+- **O que faz**: Guarda todas as informações do sistema de forma organizada
+- **Tabelas principais**:
+  - `products`: Produtos da loja (nome, preço, estoque, categoria)
+  - `categories`: Categorias dos produtos (Perfumes, Eletrônicos, etc)
+  - `users`: Usuários do sistema (email, senha, tipo: admin ou cliente)
+  - `cart_items`: Itens no carrinho de cada usuário
+  - `orders`: Pedidos finalizados
+- **Como é criado**: Usa Flyway para criar as tabelas automaticamente (arquivo `V1__init.sql`)
 
 ---
 
-## 2. Fluxo Básico do Sistema
+## 2. Como o Frontend e Backend Conversam
+
+### Arquitetura da Comunicação
+
+O sistema funciona assim:
+1. **Usuário** acessa o site pelo navegador
+2. **Frontend (React)** mostra a interface e recebe as ações do usuário
+3. **Frontend** envia requisições HTTP para o **Backend**
+4. **Backend** processa, consulta o banco de dados e responde
+5. **Frontend** atualiza a tela com a resposta
+
+### Exemplo Prático: Adicionar Produto ao Carrinho
+
+```
+Usuário clica em "Adicionar ao Carrinho"
+    ↓
+Frontend chama: productService.addToCart(product)
+    ↓
+apiClient.js envia: POST http://localhost:8080/api/cart
+    ↓
+Backend recebe no CartController
+    ↓
+CartService valida e salva no banco
+    ↓
+Banco de dados adiciona na tabela cart_items
+    ↓
+Backend responde: { success: true, message: "Produto adicionado" }
+    ↓
+Frontend mostra notificação e atualiza o ícone do carrinho
+```
+
+### Segurança na Comunicação
+
+- Todas as requisições que precisam de autenticação enviam um **token JWT** no header
+- O token é salvo no `localStorage` quando o usuário faz login
+- O `apiClient.js` adiciona o token automaticamente em todas as requisições
+- O backend valida o token antes de processar a requisição
+- Se o token estiver inválido ou expirado, retorna erro 401 (Não autorizado)
+
+### Sistema de Atualização Automática
+
+Quando um admin adiciona/edita/deleta um produto:
+1. A página admin faz a operação via API
+2. Dispara um evento: `window.dispatchEvent(new Event('productUpdated'))`
+3. O componente Product está "ouvindo" esse evento
+4. Quando recebe o evento, busca os produtos novamente da API
+5. A lista de produtos se atualiza automaticamente na tela
+
+Isso evita que o admin precise atualizar a página manualmente!
+
+---
+
+## 3. Fluxo Básico do Sistema
 
 ```
 ┌─────────────┐          ┌──────────────┐          ┌────────────┐
@@ -157,30 +213,30 @@ O sistema segue uma arquitetura em três camadas principais:
 - **Config**: SecurityConfig (JWT), CorsConfig, DataSourceConfig
 
 **Database:**
-- **products**: id, name, description, price, image_url, stock, category
+- **products**: id, name, description, price, image_url, stock, category_id (chave estrangeira)
+- **categories**: id, name (Perfumes, Eletrônicos, Plásticos, Alumínios, Calçados, Higiene)
 - **users**: id, username, password_hash, role (ADMIN/USER), email
 - **cart_items**: id, user_id, product_id, quantity
 - **orders**: id, user_id, total, status, created_at
 
 ---
 
-## 5. Decisões Arquiteturais
+## 5. Decisões Técnicas que Tomamos
 
-### Por que essa estrutura?
+### Por que escolhemos essas tecnologias?
 
-1. **Separação Frontend/Backend**: Permite escalabilidade independente e desenvolvimento paralelo
-2. **REST API**: Padrão amplamente adotado, facilita integração futura (mobile, etc.)
-3. **JWT**: Stateless authentication, adequado para SPAs
-4. **PostgreSQL**: Banco robusto, transacional, ideal para e-commerce
-5. **Spring Boot**: Ecosystem maduro, facilita DI, segurança e testes
-6. **React + Vite**: Performance de desenvolvimento rápida, bundle otimizado
+1. **Frontend separado do Backend**: Permite trabalhar nas duas partes ao mesmo tempo
+2. **API REST**: É o padrão mais usado, facilitando adicionar um app mobile no futuro
+3. **JWT (Token)**: Não precisa guardar sessão no servidor, cada requisição é independente
+4. **PostgreSQL**: Banco de dados confiável e muito usado em lojas online
+5. **Spring Boot**: Framework completo que já vem com segurança e conexão com banco
+6. **React + Vite**: React é popular e Vite deixa o desenvolvimento muito rápido
 
-### Trade-offs:
+### O que fizemos de forma simples (para o MVP):
 
-- **Simplicidade vs Escalabilidade**: Arquitetura monolítica (backend único), mas modular internamente
-- **Sem cache distribuído**: Adequado para MVP, pode adicionar Redis futuramente
-- **Sem mensageria**: Processamento síncrono suficiente para escala inicial
-- **Flyway**: Migrações versionadas garantem consistência do schema entre ambientes
+- **Sem cache**: Por enquanto não usamos Redis, mas pode ser adicionado depois para melhorar a velocidade
+- **Processamento direto**: Tudo acontece na hora, sem filas de mensagens (suficiente para nossa escala)
+- **Flyway**: Cria as tabelas automaticamente, garantindo que o banco sempre está correto
 
 ---
 

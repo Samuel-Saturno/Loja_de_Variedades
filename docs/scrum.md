@@ -257,6 +257,19 @@ Desenvolver interface React, integrar com backend via API REST, e finalizar func
 - **Samuel:** Validando banco de dados
 - **Impedimentos:** Nenhum
 
+#### 07/12/2025 (Pré-Apresentação)
+- **Antonio Nogueira:** Corrigindo script de apresentação (usar JAR compilado)
+- **Equipe:** Descobrindo problemas de integração front/back
+- **Impedimentos:** Frontend usando dados mockados, não conectando com API real
+
+#### 08/12/2025 (Preparação Final)
+- **Antonio Nogueira:** Reescrevendo componentes Product, Cart, EditProduct, DeleteProduct para usar API real
+- **Antonio Nogueira:** Implementando sistema de eventos para atualização automática
+- **Antonio Nogueira:** Criando 6 categorias no banco e associando produtos
+- **Antonio Nogueira:** Limpando script de apresentação (removendo emojis)
+- **Antonio Nogueira:** Documentando integração completa e comandos manuais
+- **Impedimentos:** Resolvidos - sistema totalmente funcional
+
 ### Review (03/12/2025)
 **Demonstração:**
 - ✅ Sistema completo funcionando end-to-end
@@ -268,10 +281,24 @@ Desenvolver interface React, integrar com backend via API REST, e finalizar func
 - ✅ PostgreSQL em produção
 - 🟡 Checkout básico (formulário presente, lógica parcial)
 
-**Métricas:**
-- 10 histórias totalmente implementadas
+### Review Final (08/12/2025)
+**Ajustes de Última Hora:**
+- ✅ Script de apresentação corrigido (usa JAR compilado)
+- ✅ Integração frontend-backend 100% funcional
+- ✅ Componentes Product, Cart, EditProduct, DeleteProduct reescritos
+- ✅ Sistema de categorias implementado (6 categorias funcionais)
+- ✅ Filtro de produtos por categoria operacional
+- ✅ Carrinho com localStorage persistente
+- ✅ Sistema de eventos para atualização automática de listas
+- ✅ Todos os CRUDs validados e funcionando
+- ✅ Script de apresentação limpo (sem emojis)
+- ✅ Documentação completa de integração
+- ✅ Comandos manuais documentados
+
+**Métricas Finais:**
+- 11 histórias totalmente implementadas
 - 1 história parcialmente implementada
-- 2 histórias planejadas para versões futuras
+- 1 história planejada para versões futuras
 
 ### Retrospectiva (03/12/2025)
 **O que funcionou bem:**
@@ -381,6 +408,24 @@ Desenvolver interface React, integrar com backend via API REST, e finalizar func
 **Resolução:** Refatoração do estado global + localStorage  
 **Tempo de Resolução:** 2 dias  
 **Data:** 28-29/11/2025
+
+**Impedimento:** Script rodando versão antiga do código (mvn spring-boot:run)  
+**Responsável:** Antonio Nogueira  
+**Resolução:** Alterado script para compilar e executar JAR  
+**Tempo de Resolução:** 1 hora  
+**Data:** 07/12/2025
+
+**Impedimento:** Frontend usando dados mockados, não conectando com API  
+**Responsável:** Antonio Nogueira  
+**Resolução:** Reescrita dos componentes para usar productService e API real  
+**Tempo de Resolução:** 1 dia  
+**Data:** 08/12/2025
+
+**Impedimento:** Categorias vazias no banco, produtos sem category_id  
+**Responsável:** Antonio Nogueira  
+**Resolução:** Criação de 6 categorias via SQL e associação com produtos  
+**Tempo de Resolução:** 2 horas  
+**Data:** 08/12/2025
 
 ---
 

@@ -41,13 +41,15 @@ Este backlog organiza as funcionalidades do sistema em **8 épicos** e **13 hist
 **Para** tomar uma decisão informada de compra
 
 **Critérios de Aceitação:**
-- [ ] Modal ou página dedicada mostra descrição completa
-- [ ] Exibe quantidade em estoque
-- [ ] Mostra categoria do produto
-- [ ] Botão "Adicionar ao Carrinho" visível
+- [x] Cards de produto mostram nome, preço, imagem e categoria
+- [x] Sistema de categorias implementado (6 categorias)
+- [x] Filtro por categoria funcional
+- [ ] Modal com descrição completa (planejado para v2.0)
+- [x] Mostra categoria do produto
+- [x] Botão "Adicionar ao Carrinho" visível
 
 **Prioridade:** Média  
-**Status:** 🟡 Parcialmente Implementado (lista mostra info básica, falta modal/detalhes)
+**Status:** 🟡 Parcialmente Implementado (categorias funcionam, falta modal de detalhes)
 
 ---
 
@@ -237,11 +239,40 @@ Este backlog organiza as funcionalidades do sistema em **8 épicos** e **13 hist
 
 ---
 
-## Épico 8: Testes e Qualidade 🧪
+## Épico 8: Categorização de Produtos 🏷️
+
+**Objetivo**: Organizar produtos em categorias para facilitar a navegação.
+
+### História 8.1: Filtrar Produtos por Categoria ✅
+**Como** cliente navegando  
+**Quero** filtrar produtos por categoria (Perfumes, Eletrônicos, etc)  
+**Para** encontrar mais rapidamente o que procuro
+
+**Critérios de Aceitação:**
+- [x] Menu de categorias na navbar
+- [x] Ao selecionar uma categoria, mostra apenas produtos daquela categoria
+- [x] Opção "Todos" mostra todos os produtos
+- [x] Backend filtra corretamente por category_id
+- [x] 6 categorias criadas: Perfumes, Eletrônicos, Plásticos, Alumínios, Calçados, Higiene
+- [x] Produtos associados às categorias corretas no banco
+
+**Prioridade:** Alta  
+**Status:** ✅ Implementado
+
+**Detalhes Técnicos:**
+- Tabela `categories` criada no banco
+- Campo `category_id` adicionado em `products` como chave estrangeira
+- Endpoint `/api/products?categoryId=X` filtra por categoria
+- Frontend envia categoryId ao buscar produtos
+- Testado com curl: cada categoria retorna produtos corretos
+
+---
+
+## Épico 9: Testes e Qualidade 🧪
 
 **Objetivo**: Garantir confiabilidade através de testes.
 
-### História 8.1: Testes Automatizados ⏳
+### História 9.1: Testes Automatizados ⏳
 **Como** desenvolvedor  
 **Quero** cobertura de testes unitários e E2E  
 **Para** garantir que o sistema funciona conforme esperado
