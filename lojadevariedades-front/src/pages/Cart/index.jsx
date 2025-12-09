@@ -1,97 +1,52 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './index.css'
-
 import Topbar from '../../components/Topbar'
 import Navbar from '../../components/Navbar'
 
-// Mock data para demonstração - em um projeto real, isso viria do estado global
-const mockCartItems = [
-  {
-    id: 1,
-    name: "Perfume Importado Luxo",
-    price: 89.99,
-    quantity: 2,
-    image: "https://via.placeholder.com/150x150?text=Perfume"
-  },
-  {
-    id: 2,
-    name: "Smartphone Android 128GB",
-    price: 899.99,
-    quantity: 1,
-    image: "https://via.placeholder.com/150x150?text=Phone"
-  }
-]
-
-// Mock data dos pedidos realizados
-const mockOrders = [
-  {
-    id: "PED001",
-    date: "2024-11-28",
-    total: 179.98,
-    status: "confirmed",
-    items: [
-      {
-        name: "Perfume Importado Luxo",
-        quantity: 2,
-        price: 89.99,
-        image: "https://via.placeholder.com/80x80?text=Perfume"
-      }
-    ]
-  },
-  {
-    id: "PED002",
-    date: "2024-11-25",
-    total: 1299.99,
-    status: "shipped",
-    estimatedDelivery: "2024-12-03",
-    trackingCode: "BR123456789",
-    items: [
-      {
-        name: "Smartphone Android 128GB",
-        quantity: 1,
-        price: 1299.99,
-        image: "https://via.placeholder.com/80x80?text=Phone"
-      }
-    ]
-  },
-  {
-    id: "PED003",
-    date: "2024-11-20",
-    total: 45.90,
-    status: "delivered",
-    deliveredDate: "2024-11-23",
-    items: [
-      {
-        name: "Panela Alumínio",
-        quantity: 1,
-        price: 45.90,
-        image: "https://via.placeholder.com/80x80?text=Panela"
-      }
-    ]
-  }
-]
-
 const Cart = () => {
   const navigate = useNavigate()
-  const [cartItems, setCartItems] = useState(mockCartItems)
+  const [cartItems, setCartItems] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('Todos')
 
-  const updateQuantity = (id, newQuantity) => {
-    if (newQuantity === 0) {
-      removeItem(id)
-      return
+  useEffect(() => {
+    loadCart()
+  }, [])
+
+  const loadCart = () => {
+    try {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]')
+      setCartItems(cart)
+    } catch (err) {
+      console.error('Erro ao carregar carrinho:', err)
+      setCartItems([])
     }
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    )
   }
 
-  const removeItem = (id) => {
-    setCartItems(items => items.filter(item => item.id !== id))
+  const saveCart = (newCart) => {
+    try {
+      localStorage.setItem('cart', JSON.stringify(newCart))
+      setCartItems(newCart)
+    } catch (err) {
+      console.error('Erro ao salvar carrinho:', err)
+    }
+  }
+
+  const updateQuantity = (productId, newQuantity) => {
+    if (newQuantity === 0) {
+      removeItem(productId)
+      return
+    }
+    const newCart = cartItems.map(item =>
+      item.id === productId ? { ...item, quantity: newQuantity } : item
+    )
+    saveCart(newCart)
+  }
+
+  const removeItem = (productId) => {
+    const newCart = cartItems.filter(item => item.id !== productId)
+    saveCart(newCart)
   }
 
   const calculateSubtotal = () => {
@@ -107,29 +62,15 @@ const Cart = () => {
   }
 
   const handleCheckout = () => {
+    if (cartItems.length === 0) {
+      alert('Seu carrinho está vazio')
+      return
+    }
     alert('Redirecionando para o checkout...')
-    // Aqui você implementaria o redirecionamento para o checkout
   }
 
   const handleContinueShopping = () => {
     navigate('/home')
-  }
-
-  const getOrderStatus = (status) => {
-    switch (status) {
-      case 'confirmed':
-        return { text: 'Pagamento Confirmado', color: '#28a745', icon: '✓' }
-      case 'shipped':
-        return { text: 'Produto Enviado', color: '#007bff', icon: '🚚' }
-      case 'delivered':
-        return { text: 'Produto Entregue', color: '#6c757d', icon: '📦' }
-      default:
-        return { text: 'Processando', color: '#ffc107', icon: '⏳' }
-    }
-  }
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('pt-BR')
   }
 
   if (cartItems.length === 0) {
@@ -196,7 +137,7 @@ const Cart = () => {
               {cartItems.map((item) => (
                 <div key={item.id} className="cart-item">
                   <div className="item-image">
-                    <img src={item.image} alt={item.name} />
+                    <img src={item.imageUrl || 'https://via.placeholder.com/150x150?text=Sem+Imagem'} alt={item.name} />
                   </div>
                   <div className="item-details">
                     <h3 className="item-name">{item.name}</h3>
@@ -256,58 +197,6 @@ const Cart = () => {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Seção de Pedidos Realizados */}
-        <div className="orders-section">
-          <h2 className="orders-title">Meus Pedidos</h2>
-          <div className="orders-list">
-            {mockOrders.map((order) => {
-              const statusInfo = getOrderStatus(order.status)
-              return (
-                <div key={order.id} className="order-card">
-                  <div className="order-header">
-                    <div className="order-info">
-                      <h3 className="order-id">Pedido #{order.id}</h3>
-                      <p className="order-date">Data: {formatDate(order.date)}</p>
-                      <p className="order-total">Total: R$ {order.total.toFixed(2)}</p>
-                    </div>
-                    <div className="order-status" style={{ color: statusInfo.color }}>
-                      <span className="status-icon">{statusInfo.icon}</span>
-                      <span className="status-text">{statusInfo.text}</span>
-                    </div>
-                  </div>
-
-                  {/* Informações específicas por status */}
-                  {order.status === 'shipped' && (
-                    <div className="order-shipping-info">
-                      <p className="tracking-code">Código de rastreamento: <strong>{order.trackingCode}</strong></p>
-                      <p className="estimated-delivery">Previsão de entrega: <strong>{formatDate(order.estimatedDelivery)}</strong></p>
-                    </div>
-                  )}
-
-                  {order.status === 'delivered' && (
-                    <div className="order-delivery-info">
-                      <p className="delivered-date">Entregue em: <strong>{formatDate(order.deliveredDate)}</strong></p>
-                    </div>
-                  )}
-
-                  {/* Lista de itens do pedido */}
-                  <div className="order-items">
-                    {order.items.map((item, index) => (
-                      <div key={index} className="order-item">
-                        <img src={item.image} alt={item.name} className="order-item-image" />
-                        <div className="order-item-details">
-                          <p className="order-item-name">{item.name}</p>
-                          <p className="order-item-info">Quantidade: {item.quantity} | Preço: R$ {item.price.toFixed(2)}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )
-            })}
           </div>
         </div>
       </div>

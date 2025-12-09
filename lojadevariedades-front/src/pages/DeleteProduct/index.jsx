@@ -1,34 +1,30 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import './index.css'
 import { useNavigate } from 'react-router-dom'
-import { IoArrowBack, IoSearch } from 'react-icons/io5'
+import { IoArrowBack } from 'react-icons/io5'
 import { MdDelete, MdWarning } from 'react-icons/md'
-import { ProductMocks } from '../../components/Product/mocks'
+import productService from '../../services/productService'
 
 const DeleteProduct = () => {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('Todos')
+  const navigate = useNavigate()
+  const [products, setProducts] = useState([])
   const [selectedProducts, setSelectedProducts] = useState([])
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const navigate = useNavigate()
+  const [error, setError] = useState('')
 
-  const categories = ['Todos', 'Perfumes', 'Eletrônicos', 'Plásticos', 'Alumínios', 'Calçados', 'Higiene']
+  useEffect(() => {
+    loadProducts()
+  }, [])
 
-  // Filtrar produtos baseado na busca e categoria
-  const filteredProducts = ProductMocks.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = categoryFilter === 'Todos' || product.category === categoryFilter
-    return matchesSearch && matchesCategory
-  })
-
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value)
-  }
-
-  const handleCategoryChange = (e) => {
-    setCategoryFilter(e.target.value)
+  const loadProducts = async () => {
+    try {
+      const data = await productService.getAll(0, 100)
+      setProducts(data.content || [])
+    } catch (err) {
+      console.error('Erro ao carregar produtos:', err)
+      setError('Erro ao carregar produtos')
+    }
   }
 
   const handleProductSelect = (productId) => {
@@ -42,10 +38,10 @@ const DeleteProduct = () => {
   }
 
   const handleSelectAll = () => {
-    if (selectedProducts.length === filteredProducts.length) {
+    if (selectedProducts.length === products.length) {
       setSelectedProducts([])
     } else {
-      setSelectedProducts(filteredProducts.map(product => product.id))
+      setSelectedProducts(products.map(product => product.id))
     }
   }
 
@@ -59,19 +55,22 @@ const DeleteProduct = () => {
 
   const handleConfirmDelete = async () => {
     setIsDeleting(true)
+    setError('')
     
     try {
-      // Simular exclusão dos produtos
-      console.log('Produtos excluídos:', selectedProducts)
-      
-      // Simular delay da API
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Deletar cada produto selecionado
+      for (const productId of selectedProducts) {
+        await productService.delete(productId)
+      }
       
       alert(`${selectedProducts.length} produto(s) excluído(s) com sucesso!`)
+      window.dispatchEvent(new Event('productUpdated'))
       setSelectedProducts([])
       setShowConfirmModal(false)
-    } catch (error) {
-      alert('Erro ao excluir produtos')
+      await loadProducts() // Recarregar lista
+    } catch (err) {
+      console.error('Erro ao excluir produtos:', err)
+      setError('Erro ao excluir alguns produtos')
     } finally {
       setIsDeleting(false)
     }
@@ -86,7 +85,7 @@ const DeleteProduct = () => {
   }
 
   const getSelectedProductsData = () => {
-    return filteredProducts.filter(product => selectedProducts.includes(product.id))
+    return products.filter(product => selectedProducts.includes(product.id))
   }
 
   return (
@@ -99,35 +98,41 @@ const DeleteProduct = () => {
               <MdWarning className='delete-warning-icon' />
               <h2 className='delete-modal-title'>Confirmar Exclusão</h2>
             </div>
-            
-            <div className='delete-modal-content'>
-              <p className='delete-modal-message'>
-                Você tem certeza que deseja excluir {selectedProducts.length} produto(s)?
+            <div className='delete-modal-body'>
+              <p className='delete-modal-text'>
+                Tem certeza que deseja excluir {selectedProducts.length} produto(s)?
               </p>
-              <div className='delete-products-preview'>
+              <div className='delete-products-list'>
                 {getSelectedProductsData().map(product => (
-                  <div key={product.id} className='delete-preview-item'>
-                    <img src={product.image} alt={product.name} className='delete-preview-image' />
-                    <span className='delete-preview-name'>{product.name}</span>
+                  <div key={product.id} className='delete-product-item'>
+                    <img 
+                      src={product.imageUrl || 'https://via.placeholder.com/50x50?text=Sem+Imagem'} 
+                      alt={product.name}
+                      style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '5px' }}
+                    />
+                    <div>
+                      <strong>{product.name}</strong>
+                      <br />
+                      <small>R$ {product.price.toFixed(2)}</small>
+                    </div>
                   </div>
                 ))}
               </div>
               <p className='delete-modal-warning'>
-                <strong>Atenção:</strong> Esta ação não pode ser desfeita!
+                Esta ação não pode ser desfeita!
               </p>
             </div>
-            
-            <div className='delete-modal-actions'>
-              <button 
-                onClick={handleCancelDelete} 
-                className='delete-cancel-modal-btn'
+            <div className='delete-modal-footer'>
+              <button
+                onClick={handleCancelDelete}
+                className='delete-cancel-btn'
                 disabled={isDeleting}
               >
                 Cancelar
               </button>
-              <button 
-                onClick={handleConfirmDelete} 
-                className='delete-confirm-modal-btn'
+              <button
+                onClick={handleConfirmDelete}
+                className='delete-confirm-btn'
                 disabled={isDeleting}
               >
                 {isDeleting ? 'Excluindo...' : 'Confirmar Exclusão'}
@@ -137,109 +142,76 @@ const DeleteProduct = () => {
         </div>
       )}
 
-      {/* Página Principal */}
-      <div className='delete-product-header-section'>
-        <button onClick={handleBack} className='delete-main-back-btn'>
-          <IoArrowBack size={20} />
-        </button>
-        <h1 className='delete-product-main-title'>Excluir Produtos</h1>
-      </div>
+      <div className='delete-product-container'>
+        <div className='delete-product-header'>
+          <button onClick={handleBack} className='back-button'>
+            <IoArrowBack size={20} />
+          </button>
+          <h1 className='delete-product-title'>Excluir Produtos</h1>
+        </div>
 
-      <div className='delete-product-search-section'>
-        <div className='delete-search-filters'>
-          <div className='delete-search-input-wrapper'>
-            <IoSearch className='delete-search-icon' />
-            <input
-              type='text'
-              placeholder='Buscar produtos por nome ou descrição...'
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className='delete-search-input'
-            />
+        {error && (
+          <div style={{
+            color: '#e74c3c',
+            backgroundColor: '#fadbd8',
+            padding: '10px',
+            borderRadius: '5px',
+            marginBottom: '15px'
+          }}>
+            {error}
           </div>
-          
-          <select
-            value={categoryFilter}
-            onChange={handleCategoryChange}
-            className='delete-category-filter'
+        )}
+
+        <div className='delete-product-actions'>
+          <button onClick={handleSelectAll} className='select-all-btn'>
+            {selectedProducts.length === products.length ? 'Desselecionar Todos' : 'Selecionar Todos'}
+          </button>
+          <button 
+            onClick={handleDeleteClick} 
+            className='delete-selected-btn'
+            disabled={selectedProducts.length === 0}
           >
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
+            <MdDelete size={20} />
+            Excluir Selecionados ({selectedProducts.length})
+          </button>
         </div>
 
-        <div className='delete-actions-bar'>
-          <div className='delete-results-info'>
-            <p>{filteredProducts.length} produto(s) encontrado(s) | {selectedProducts.length} selecionado(s)</p>
-          </div>
-          
-          <div className='delete-action-buttons'>
-            <button 
-              onClick={handleSelectAll}
-              className='delete-select-all-btn'
-            >
-              {selectedProducts.length === filteredProducts.length ? 'Desselecionar Todos' : 'Selecionar Todos'}
-            </button>
-            
-            <button 
-              onClick={handleDeleteClick}
-              className='delete-selected-btn'
-              disabled={selectedProducts.length === 0}
-            >
-              <MdDelete size={18} />
-              Excluir Selecionados ({selectedProducts.length})
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className='delete-products-list-section'>
-        {filteredProducts.length === 0 ? (
-          <div className='delete-no-products'>
-            <p>Nenhum produto encontrado</p>
-          </div>
-        ) : (
-          <div className='delete-products-grid'>
-            {filteredProducts.map((product) => (
-              <div 
-                key={product.id} 
-                className={`delete-product-card ${
-                  selectedProducts.includes(product.id) ? 'delete-card-selected' : ''
-                }`}
+        <div className='delete-products-grid'>
+          {products.length === 0 ? (
+            <p style={{ textAlign: 'center', padding: '50px' }}>Nenhum produto disponível</p>
+          ) : (
+            products.map(product => (
+              <div
+                key={product.id}
+                className={`delete-product-card ${selectedProducts.includes(product.id) ? 'selected' : ''}`}
                 onClick={() => handleProductSelect(product.id)}
               >
-                <div className='delete-card-checkbox'>
-                  <input
-                    type='checkbox'
-                    checked={selectedProducts.includes(product.id)}
-                    onChange={() => handleProductSelect(product.id)}
-                    className='delete-checkbox'
-                  />
-                </div>
-                
-                <div className='delete-card-image-wrapper'>
+                <input
+                  type='checkbox'
+                  checked={selectedProducts.includes(product.id)}
+                  onChange={() => handleProductSelect(product.id)}
+                  onClick={(e) => e.stopPropagation()}
+                  className='product-checkbox'
+                />
+                <div className='product-image-container'>
                   <img 
-                    src={product.image} 
+                    src={product.imageUrl || 'https://via.placeholder.com/300x300?text=Sem+Imagem'} 
                     alt={product.name}
-                    className='delete-card-image'
+                    className='product-image'
                   />
                 </div>
-                
-                <div className='delete-card-info'>
-                  <h3 className='delete-card-name'>{product.name}</h3>
-                  <p className='delete-card-description'>{product.description}</p>
-                  <div className='delete-card-details'>
-                    <span className='delete-card-category'>{product.category}</span>
-                    <span className='delete-card-price'>R$ {product.price.toFixed(2)}</span>
+                <div className='product-info'>
+                  <h3 className='product-name'>{product.name}</h3>
+                  <p className='product-description'>{product.description}</p>
+                  <div className='product-details'>
+                    <span className='product-price'>R$ {product.price.toFixed(2)}</span>
+                    <span className='product-stock'>Estoque: {product.stockQuantity}</span>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+            ))
+          )}
+        </div>
       </div>
     </div>
   )

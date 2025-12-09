@@ -1,100 +1,98 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import './index.css'
-import { useNavigate } from 'react-router-dom'
-import { IoArrowBack, IoSearch } from 'react-icons/io5'
-import { MdEdit } from 'react-icons/md'
-import { ProductMocks } from '../../components/Product/mocks'
-
+import { useNavigate, useLocation } from 'react-router-dom'
+import { IoArrowBack } from 'react-icons/io5'
+import productService from '../../services/productService'
 
 const EditProduct = () => {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('Todos')
-  const [editingProduct, setEditingProduct] = useState(null)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [products, setProducts] = useState([])
+  const [selectedProduct, setSelectedProduct] = useState(null)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
-    quantity: '',
-    category: '',
-    image: null,
-    imagePreview: null
+    stockQuantity: '',
+    categoryId: '1',
+    imageUrl: ''
   })
   const [isLoading, setIsLoading] = useState(false)
-  const navigate = useNavigate()
+  const [error, setError] = useState('')
 
-  const categories = ['Todos', 'Perfumes', 'Eletrônicos', 'Plásticos', 'Alumínios', 'Calçados', 'Higiene']
+  const categories = [
+    { id: 1, name: 'Perfumes' },
+    { id: 2, name: 'Eletrônicos' },
+    { id: 3, name: 'Plásticos' },
+    { id: 4, name: 'Alumínios' },
+    { id: 5, name: 'Calçados' },
+    { id: 6, name: 'Higiene' }
+  ]
 
-  // Filtrar produtos baseado na busca e categoria
-  const filteredProducts = ProductMocks.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = categoryFilter === 'Todos' || product.category === categoryFilter
-    return matchesSearch && matchesCategory
-  })
+  useEffect(() => {
+    loadProducts()
+  }, [])
 
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value)
+  const loadProducts = async () => {
+    try {
+      const data = await productService.getAll(0, 100)
+      setProducts(data.content || [])
+    } catch (err) {
+      console.error('Erro ao carregar produtos:', err)
+      setError('Erro ao carregar produtos')
+    }
   }
 
-  const handleCategoryChange = (e) => {
-    setCategoryFilter(e.target.value)
-  }
-
-  const handleEditClick = (product) => {
-    setEditingProduct(product)
+  const handleProductSelect = (product) => {
+    setSelectedProduct(product)
     setFormData({
       name: product.name,
       description: product.description,
       price: product.price.toString(),
-      quantity: product.quantity ? product.quantity.toString() : '0',
-      category: product.category,
-      image: null,
-      imagePreview: product.image
+      stockQuantity: product.stockQuantity.toString(),
+      categoryId: product.categoryId ? product.categoryId.toString() : '1',
+      imageUrl: product.imageUrl || ''
     })
+    setError('')
   }
 
-  const handleFormInputChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target
     setFormData({
       ...formData,
       [name]: value
     })
+    setError('')
   }
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setFormData({
-          ...formData,
-          image: file,
-          imagePreview: reader.result
-        })
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const handleUpdateProduct = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!selectedProduct) {
+      setError('Selecione um produto para editar')
+      return
+    }
+
     setIsLoading(true)
+    setError('')
 
     try {
-      // Simular atualização do produto
-      console.log('Produto atualizado:', {
-        id: editingProduct.id,
-        ...formData,
-        price: parseFloat(formData.price)
-      })
-      
-      // Simular delay da API
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
+      const productData = {
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        stockQuantity: parseInt(formData.stockQuantity),
+        categoryId: parseInt(formData.categoryId),
+        imageUrl: formData.imageUrl || 'https://via.placeholder.com/300x300?text=Sem+Imagem',
+        active: true
+      }
+
+      await productService.update(selectedProduct.id, productData)
       alert('Produto atualizado com sucesso!')
-      setEditingProduct(null)
-    } catch (error) {
-      alert('Erro ao atualizar produto')
+      window.dispatchEvent(new Event('productUpdated'))
+      navigate('/manage')
+    } catch (err) {
+      console.error('Erro ao atualizar produto:', err)
+      setError('Erro ao atualizar produto. Verifique os dados e tente novamente.')
     } finally {
       setIsLoading(false)
     }
@@ -104,230 +102,180 @@ const EditProduct = () => {
     navigate('/manage')
   }
 
-  const handleCancelEdit = () => {
-    setEditingProduct(null)
-    setFormData({
-      name: '',
-      description: '',
-      price: '',
-      quantity: '',
-      category: '',
-      image: null,
-      imagePreview: null
-    })
-  }
+  return (
+    <div className='add-product-container'>
+      <div className='add-product-header'>
+        <button onClick={handleBack} className='back-button'>
+          <IoArrowBack size={20} />
+        </button>
+        <h1 className='add-product-title'>Editar Produto</h1>
+      </div>
 
-  // Se está editando um produto, mostra o formulário
-  if (editingProduct) {
-    return (
-      <div className='edit-product-form-wrapper'>
-        <div className='edit-product-form-header'>
-          <button onClick={handleCancelEdit} className='edit-form-back-btn'>
-            <IoArrowBack size={20} />
-          </button>
-          <h1 className='edit-form-title'>Editar Produto: {editingProduct.name}</h1>
+      <div className='add-product-form-container' style={{ display: 'flex', gap: '20px' }}>
+        {/* Lista de produtos */}
+        <div style={{ flex: '1', maxHeight: '600px', overflowY: 'auto', border: '1px solid #ddd', borderRadius: '8px', padding: '15px' }}>
+          <h2 style={{ marginBottom: '15px' }}>Selecione um produto:</h2>
+          {products.length === 0 ? (
+            <p>Nenhum produto disponível</p>
+          ) : (
+            products.map(product => (
+              <div
+                key={product.id}
+                onClick={() => handleProductSelect(product)}
+                style={{
+                  padding: '10px',
+                  marginBottom: '10px',
+                  border: selectedProduct?.id === product.id ? '2px solid #007bff' : '1px solid #ddd',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                  backgroundColor: selectedProduct?.id === product.id ? '#e7f3ff' : 'white'
+                }}
+              >
+                <strong>{product.name}</strong>
+                <br />
+                <small>R$ {product.price.toFixed(2)} - Estoque: {product.stockQuantity}</small>
+              </div>
+            ))
+          )}
         </div>
 
-        <div className='edit-product-form-container'>
-          <form onSubmit={handleUpdateProduct} className='edit-product-form'>
-            <div className='edit-form-row'>
-              <div className='edit-form-group'>
-                <label htmlFor='edit-name'>Nome do Produto *</label>
-                <input
-                  type='text'
-                  id='edit-name'
-                  name='name'
-                  value={formData.name}
-                  onChange={handleFormInputChange}
-                  required
-                />
-              </div>
-
-              <div className='edit-form-group'>
-                <label htmlFor='edit-category'>Categoria *</label>
-                <select
-                  id='edit-category'
-                  name='category'
-                  value={formData.category}
-                  onChange={handleFormInputChange}
-                  required
-                >
-                  {categories.filter(cat => cat !== 'Todos').map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
-              </div>
+        {/* Formulário de edição */}
+        <form onSubmit={handleSubmit} className='add-product-form' style={{ flex: '2' }}>
+          {error && (
+            <div style={{
+              color: '#e74c3c',
+              backgroundColor: '#fadbd8',
+              padding: '10px',
+              borderRadius: '5px',
+              marginBottom: '15px'
+            }}>
+              {error}
             </div>
+          )}
 
-            <div className='edit-form-group'>
-              <label htmlFor='edit-description'>Descrição *</label>
-              <textarea
-                id='edit-description'
-                name='description'
-                value={formData.description}
-                onChange={handleFormInputChange}
-                rows={4}
+          {!selectedProduct && (
+            <div style={{
+              color: '#856404',
+              backgroundColor: '#fff3cd',
+              padding: '15px',
+              borderRadius: '5px',
+              marginBottom: '15px',
+              textAlign: 'center'
+            }}>
+              Selecione um produto da lista ao lado para editar
+            </div>
+          )}
+
+          <div className='form-row'>
+            <div className='form-group'>
+              <label htmlFor='name'>Nome do Produto *</label>
+              <input
+                type='text'
+                id='name'
+                name='name'
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder='Digite o nome do produto'
                 required
+                disabled={!selectedProduct}
+              />
+            </div>
+          </div>
+
+          <div className='form-group'>
+            <label htmlFor='description'>Descrição</label>
+            <textarea
+              id='description'
+              name='description'
+              value={formData.description}
+              onChange={handleInputChange}
+              placeholder='Digite a descrição do produto'
+              rows='4'
+              disabled={!selectedProduct}
+            />
+          </div>
+
+          <div className='form-row'>
+            <div className='form-group'>
+              <label htmlFor='price'>Preço (R$) *</label>
+              <input
+                type='number'
+                id='price'
+                name='price'
+                value={formData.price}
+                onChange={handleInputChange}
+                placeholder='0.00'
+                step='0.01'
+                min='0'
+                required
+                disabled={!selectedProduct}
               />
             </div>
 
-            <div className='edit-form-row'>
-              <div className='edit-form-group'>
-                <label htmlFor='edit-price'>Preço (R$) *</label>
-                <input
-                  type='number'
-                  id='edit-price'
-                  name='price'
-                  value={formData.price}
-                  onChange={handleFormInputChange}
-                  min='0'
-                  step='0.01'
-                  required
-                />
-              </div>
-
-              <div className='edit-form-group'>
-                <label htmlFor='edit-quantity'>Quantidade em Estoque *</label>
-                <input
-                  type='number'
-                  id='edit-quantity'
-                  name='quantity'
-                  value={formData.quantity}
-                  onChange={handleFormInputChange}
-                  min='0'
-                  step='1'
-                  required
-                />
-              </div>
+            <div className='form-group'>
+              <label htmlFor='stockQuantity'>Quantidade em Estoque *</label>
+              <input
+                type='number'
+                id='stockQuantity'
+                name='stockQuantity'
+                value={formData.stockQuantity}
+                onChange={handleInputChange}
+                placeholder='0'
+                min='0'
+                required
+                disabled={!selectedProduct}
+              />
             </div>
+          </div>
 
-            <div className='edit-form-row'>
-              <div className='edit-form-group'>
-                <label htmlFor='edit-image'>Nova Imagem (opcional)</label>
-                <input
-                  type='file'
-                  id='edit-image'
-                  accept='image/*'
-                  onChange={handleImageChange}
-                  className='edit-image-input'
-                />
-              </div>
-            </div>
-
-            {formData.imagePreview && (
-              <div className='edit-image-preview-container'>
-                <label>Pré-visualização</label>
-                <img 
-                  src={formData.imagePreview} 
-                  alt='Preview' 
-                  className='edit-image-preview'
-                />
-              </div>
-            )}
-
-            <div className='edit-form-actions'>
-              <button 
-                type='button' 
-                onClick={handleCancelEdit} 
-                className='edit-cancel-btn'
-                disabled={isLoading}
+          <div className='form-row'>
+            <div className='form-group'>
+              <label htmlFor='categoryId'>Categoria *</label>
+              <select
+                id='categoryId'
+                name='categoryId'
+                value={formData.categoryId}
+                onChange={handleInputChange}
+                required
+                disabled={!selectedProduct}
               >
-                Cancelar
-              </button>
-              <button 
-                type='submit' 
-                className='edit-submit-btn'
-                disabled={isLoading}
-              >
-                {isLoading ? 'Atualizando...' : 'Atualizar Produto'}
-              </button>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
             </div>
-          </form>
-        </div>
-      </div>
-    )
-  }
 
-  // Página principal com busca e listagem
-  return (
-    <div className='edit-product-main-wrapper'>
-      <div className='edit-product-header-section'>
-        <button onClick={handleBack} className='edit-main-back-btn'>
-          <IoArrowBack size={20} />
-        </button>
-        <h1 className='edit-product-main-title'>Editar Produtos</h1>
-      </div>
-
-      <div className='edit-product-search-section'>
-        <div className='edit-search-filters'>
-          <div className='edit-search-input-wrapper'>
-            <IoSearch className='edit-search-icon' />
-            <input
-              type='text'
-              placeholder='Buscar produtos por nome ou descrição...'
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className='edit-search-input'
-            />
+            <div className='form-group'>
+              <label htmlFor='imageUrl'>URL da Imagem</label>
+              <input
+                type='url'
+                id='imageUrl'
+                name='imageUrl'
+                value={formData.imageUrl}
+                onChange={handleInputChange}
+                placeholder='https://exemplo.com/imagem.jpg'
+                disabled={!selectedProduct}
+              />
+            </div>
           </div>
-          
-          <select
-            value={categoryFilter}
-            onChange={handleCategoryChange}
-            className='edit-category-filter'
-          >
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-        </div>
 
-        <div className='edit-results-info'>
-          <p>{filteredProducts.length} produto(s) encontrado(s)</p>
-        </div>
-      </div>
-
-      <div className='edit-products-list-section'>
-        {filteredProducts.length === 0 ? (
-          <div className='edit-no-products'>
-            <p>Nenhum produto encontrado</p>
+          <div className='form-actions'>
+            <button
+              type='button'
+              onClick={handleBack}
+              className='cancel-button'
+            >
+              Cancelar
+            </button>
+            <button
+              type='submit'
+              className='submit-button'
+              disabled={isLoading || !selectedProduct}
+            >
+              {isLoading ? 'Atualizando...' : 'Atualizar Produto'}
+            </button>
           </div>
-        ) : (
-          <div className='edit-products-list'>
-            {filteredProducts.map((product) => (
-              <div key={product.id} className='edit-product-item'>
-                <div className='edit-product-image-wrapper'>
-                  <img 
-                    src={product.image} 
-                    alt={product.name}
-                    className='edit-product-item-image'
-                  />
-                </div>
-                
-                <div className='edit-product-item-info'>
-                  <h3 className='edit-product-item-name'>{product.name}</h3>
-                  <p className='edit-product-item-description'>{product.description}</p>
-                  <div className='edit-product-item-details'>
-                    <span className='edit-product-item-category'>{product.category}</span>
-                    <span className='edit-product-item-price'>R$ {product.price.toFixed(2)}</span>
-                  </div>
-                </div>
-                
-                <button 
-                  onClick={() => handleEditClick(product)}
-                  className='edit-product-action-btn'
-                  title='Editar produto'
-                >
-                  <MdEdit size={20} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+        </form>
       </div>
     </div>
   )

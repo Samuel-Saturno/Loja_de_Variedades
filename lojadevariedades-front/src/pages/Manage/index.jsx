@@ -6,6 +6,21 @@ import Product from '../../components/Product'
 const Manage = () => {
   const [searchTerm] = useState('') // Para manter compatibilidade com Product
   const [selectedCategory] = useState('Todos') // Para manter compatibilidade com Product
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
+
+  // Função para forçar atualização dos produtos
+  const handleRefresh = () => {
+    setRefreshTrigger(prev => prev + 1)
+  }
+
+  // Escutar evento personalizado de atualização de produtos
+  React.useEffect(() => {
+    const handleProductUpdate = () => {
+      handleRefresh()
+    }
+    window.addEventListener('productUpdated', handleProductUpdate)
+    return () => window.removeEventListener('productUpdated', handleProductUpdate)
+  }, [])
 
   return (
     <div className='manage-container'>
@@ -18,6 +33,7 @@ const Manage = () => {
             <Product 
                 searchTerm={searchTerm} 
                 selectedCategory={selectedCategory}
+                refreshTrigger={refreshTrigger}
             />
         </div>
     </div>

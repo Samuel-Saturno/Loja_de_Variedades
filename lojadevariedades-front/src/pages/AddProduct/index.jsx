@@ -53,6 +53,7 @@ const AddProduct = () => {
 
             await productService.create(productData)
             alert('Produto adicionado com sucesso!')
+            window.dispatchEvent(new Event('productUpdated'))
             navigate('/manage')
         } catch (err) {
             console.error('Erro ao adicionar produto:', err)
